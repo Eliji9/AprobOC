@@ -57,6 +57,3 @@ la clase MIGO, así que ningún cambio de fase implica rehacer lo construido.
 src/            Objetos ABAP (abapGit), cuando inicie el desarrollo
 docs/           Documentación de diseño y comparativo de opciones
 ```
-
----
-Perceptio S.A.S. · Célula ABAP Cloud – Clean Core
