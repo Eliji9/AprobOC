@@ -25,7 +25,7 @@
   --t1:#4fc7bd; --t2:#6aa8f0; --t3:#f2867d; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.55;padding:0 16px}
-.wrap{max-width:1120px;margin:0 auto;padding-block:28px 56px;display:flex;flex-direction:column;gap:28px}
+.wrap{max-width:1360px;margin:0 auto;padding-block:28px 56px;display:flex;flex-direction:column;gap:28px}
 h1,h2,h3{text-wrap:balance;margin:0;line-height:1.2}
 h1{font-size:clamp(1.6rem,3.4vw,2.2rem);font-weight:700;letter-spacing:-.01em}
 h2{font-size:1.25rem;font-weight:600}
@@ -39,8 +39,8 @@ header .lead{color:var(--muted);max-width:70ch}
 .chip{font-size:.78rem;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;color:var(--muted)}
 .chip b{color:var(--fg);font-weight:600}
 
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:1180px){.grid{grid-template-columns:1fr}}
 .opt{background:var(--surface);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;min-width:0}
 .opt-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
 .opt.o1 .opt-head{border-top:4px solid var(--teal);border-radius:10px 10px 0 0}
@@ -48,6 +48,10 @@ header .lead{color:var(--muted);max-width:70ch}
 .tag{align-self:flex-start;font-family:var(--mono);font-size:.74rem;font-weight:500;padding:2px 8px;border-radius:4px}
 .o1 .tag{background:var(--teal-soft);color:var(--teal)}
 .o2 .tag{background:var(--blue-soft);color:var(--blue)}
+.opt.o3 .opt-head{border-top:4px solid var(--good);border-radius:10px 10px 0 0}
+.o3 .tag{background:var(--good-soft);color:var(--good)}
+.o3 .flow{--accent:var(--good)}
+.pill.plazo{background:var(--blue-soft);color:var(--blue)}
 .opt-head p{color:var(--muted);font-size:.92rem}
 .sec{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px;min-width:0}
 .sec:last-child{border-bottom:0}
@@ -116,12 +120,12 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
 <header>
   <span class="eyebrow">Migración ECC → S/4HANA Cloud Private · Clean Core</span>
   <h1>Liberación automática de órdenes de compra</h1>
-  <p class="lead">Reemplazo del include <code>ZMM_APR_PED_BOT</code> (job de ECC que libera OC por rangos de monto con <code>BAPI_PO_RELEASE</code> y luego ejecuta anticipo, MIGO y Coupa). En S/4 la liberación se hace con Flexible Workflow, sin tocar su configuración ni los BAdIs del otro equipo.</p>
+  <p class="lead">Reemplazo del include <code>ZMM_APR_PED_BOT</code> (job de ECC que libera OC por rangos de monto con <code>BAPI_PO_RELEASE</code> y luego ejecuta anticipo, MIGO y Coupa). En S/4 la liberación se hace con Flexible Workflow. Se comparan tres opciones: dos que no tocan su configuración ni los BAdIs del otro equipo, y una que se apoya en esos BAdIs cuando estén listos.</p>
   <div class="ctx">
     <span class="chip">Aprobador: <b>usuario genérico admin. de workflow</b></span>
     <span class="chip">Tarea: <b>TS00800531</b></span>
     <span class="chip">MIGO: <b>≤ 1–2 min tras aprobación</b></span>
-    <span class="chip">BAdIs de workflow: <b>sin cambios</b></span>
+    <span class="chip">BAdIs de workflow: <b>a cargo de otro equipo</b></span>
   </div>
 </header>
 
@@ -275,32 +279,109 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       </ul>
     </div>
   </section>
+
+  <!-- OPCIÓN 3 -->
+  <section class="opt o3">
+    <div class="opt-head">
+      <span class="tag">OPCIÓN 3</span>
+      <h2>BAdIs de Flexible Workflow + job de MIGO</h2>
+      <p>El otro equipo implementa la condición de monto en los BAdIs del workflow. Si ningún paso aplica, el workflow libera la OC solo. Un job tuyo crea la MIGO.</p>
+    </div>
+
+    <div class="sec">
+      <h3>Solución</h3>
+      <ol class="flow">
+        <li><div><span class="where">S/4 · BAdI de condición (otro equipo)</span><span class="what">La condición custom "Monto USD fuera del rango automático del nivel N" llama a tu clase de reglas.</span></div></li>
+        <li><div><span class="where">S/4 · Flexible Workflow estándar</span><span class="what">Si ningún paso aplica, la OC se libera automáticamente, sin aprobador técnico.</span></div></li>
+        <li><div><span class="where">S/4 · Application Job, cada 1–5 min</span><span class="what">Toma las OC liberadas y no procesadas que cumplen el criterio de MIGO automática.</span></div></li>
+        <li><div><span class="where">S/4 · Post-liberación</span><span class="what">Servicios múltiples, anticipo, Coupa y MIGO con la clase existente.</span></div></li>
+      </ol>
+      <p class="note">La regla de monto sigue siendo tuya: el BAdI solo llama a <code>ZCL_MM_PO_APPROVAL_RULES</code>.</p>
+    </div>
+
+    <div class="sec">
+      <h3>Objetos a crear</h3>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Objeto</th><th>Tipo</th><th>Tier</th></tr></thead>
+        <tbody>
+          <tr><td class="obj">ZMM_PO_APPR_RULE</td><td>Tabla BD + mantenimiento de configuración</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">ZMM_PO_APPR_CTRL</td><td>Tabla BD (control y auditoría)</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">ZCL_MM_PO_APPROVAL_RULES</td><td>Clase ABAP (regla de monto USD, usada por el BAdI)</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">Implementación BAdI</td><td><code>SWF_WORKFLOW_CONDITION_DEF/EVAL</code> (otro equipo)</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">ZCL_MM_PO_POSTREL_JOB</td><td>Clase ABAP de Application Job + catálogo + plantilla</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">Clase MIGO existente</td><td>Reutilizada, ya en ABAP Cloud</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">Wrapper anticipo</td><td>Clase wrapper, solo si <code>ZFMFI_CHECK_PO</code> es clásica</td><td><span class="tier t2">T2 · C1</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="sec meter">
+      <h3>Clean core</h3>
+      <div class="big">≈ 95 %<small>Tier 1 · 0 % Tier 3</small></div>
+      <div class="bar" aria-label="95% Tier 1, 5% Tier 2"><span class="b1" style="width:95%"></span><span class="b2" style="width:5%"></span></div>
+      <div class="legend"><span><i style="background:var(--t1)"></i>Tier 1 · ABAP Cloud</span><span><i style="background:var(--t2)"></i>Tier 2 · wrapper C1</span></div>
+      <p class="note">Por qué: la liberación usa los BAdIs released del framework estándar, así que no hace falta wrapper de decisión ni usuario administrador aprobando. Solo el anticipo podría quedar en Tier 2.</p>
+    </div>
+
+    <div class="sec">
+      <h3>Pros y contras</h3>
+      <div class="pc">
+        <div class="pro"><h3>Pros</h3><ul>
+          <li>La opción más clean core</li>
+          <li>Liberación estándar: sin aprobador técnico</li>
+          <li>Auditoría natural: la OC "no requirió aprobación"</li>
+          <li>Liberación inmediata, sin esperar un job</li>
+          <li>Menos objetos y sin costo adicional</li>
+        </ul></div>
+        <div class="con"><h3>Contras</h3><ul>
+          <li>Depende del cronograma del otro equipo (meses)</li>
+          <li>No controlas la implementación del BAdI</li>
+          <li>La lógica de rangos se invierte frente a ECC: hay que remapearla con el negocio</li>
+          <li>El job debe distinguir qué OC llevan MIGO automática</li>
+          <li>Si la OC cambia, el workflow se reinicia y la condición se vuelve a evaluar</li>
+        </ul></div>
+      </div>
+    </div>
+
+    <div class="sec via">
+      <h3>Viabilidad</h3>
+      <span class="pill plazo">Alta · a mediano plazo</span>
+      <ul>
+        <li>Técnicamente es el camino estándar de SAP</li>
+        <li>Disponible solo cuando el otro equipo libere los BAdIs</li>
+        <li>Definir el criterio de MIGO: misma regla de monto o sin pasos de aprobación manual</li>
+      </ul>
+    </div>
+  </section>
 </div>
 
 <section class="compare">
   <h2>Comparativo rápido</h2>
   <div class="tbl-wrap"><table>
-    <thead><tr><th>Criterio</th><th>Opción 1 · Job S/4</th><th>Opción 2 · Agente Joule</th></tr></thead>
+    <thead><tr><th>Criterio</th><th>Opción 1 · Job S/4</th><th>Opción 2 · Agente Joule</th><th>Opción 3 · BAdI + job MIGO</th></tr></thead>
     <tbody>
-      <tr><td>Clean core</td><td>≈ 85 % (T1 + T2)</td><td class="win">≈ 90 % (T1 + BTP)</td></tr>
-      <tr><td>Equivalencia con ECC</td><td class="win">Total</td><td>Total, con más piezas</td></tr>
-      <tr><td>Latencia de aprobación</td><td class="win">1–5 min</td><td>5–15 min</td></tr>
-      <tr><td>Costo incremental</td><td class="win">Ninguno</td><td>AI Units + licencias</td></tr>
-      <tr><td>Auditoría</td><td class="win">Regla determinística</td><td>Regla en S/4, orquestada por IA</td></tr>
-      <tr><td>Esfuerzo estimado</td><td class="win">Bajo–medio</td><td>Medio–alto</td></tr>
-      <tr><td>Valor de innovación</td><td>Bajo</td><td class="win">Alto</td></tr>
-      <tr><td>Viabilidad</td><td class="win">Alta</td><td>Media</td></tr>
+      <tr><td>Clean core</td><td>≈ 85 % (T1 + T2)</td><td>≈ 90 % (T1 + BTP)</td><td class="win">≈ 95 % (T1)</td></tr>
+      <tr><td>Quién libera</td><td>Usuario genérico admin.</td><td>Agente con usuario genérico</td><td class="win">Workflow estándar</td></tr>
+      <tr><td>Equivalencia con ECC</td><td class="win">Total</td><td>Total, con más piezas</td><td>Funcional, con rangos remapeados</td></tr>
+      <tr><td>Latencia de liberación</td><td>1–5 min</td><td>5–15 min</td><td class="win">Inmediata</td></tr>
+      <tr><td>Costo incremental</td><td class="win">Ninguno</td><td>AI Units + licencias</td><td class="win">Ninguno</td></tr>
+      <tr><td>Auditoría</td><td>Aprueba un usuario técnico</td><td>Regla en S/4, orquestada por IA</td><td class="win">Comportamiento estándar</td></tr>
+      <tr><td>Dependencias</td><td class="win">Ninguna</td><td>BTP, Joule y licencias</td><td>Equipo de BAdIs</td></tr>
+      <tr><td>Disponibilidad</td><td class="win">Inmediata</td><td>Media</td><td>En meses</td></tr>
+      <tr><td>Esfuerzo propio</td><td>Bajo–medio</td><td>Medio–alto</td><td class="win">Bajo</td></tr>
+      <tr><td>Valor de innovación</td><td>Bajo</td><td class="win">Alto</td><td>Bajo</td></tr>
+      <tr><td>Viabilidad</td><td class="win">Alta</td><td>Media</td><td>Alta, a mediano plazo</td></tr>
     </tbody>
   </table></div>
 </section>
 
 <section class="reco">
   <h2>Recomendación</h2>
-  <p><b>Salir a productivo con la Opción 1</b> y dejar el agente Joule como evolución. Las dos opciones comparten la tabla de reglas, la clase de reglas, la tabla de control y la clase MIGO, así que pasar a la Opción 2 no implica rehacer nada.</p>
+  <p><b>Usar la Opción 1 como puente hacia la Opción 3.</b> Se sale a productivo ya, sin esperar los BAdIs, y se termina en la opción más limpia. Las tres opciones comparten la tabla de reglas, la clase de reglas, la tabla de control y la clase MIGO, así que ningún cambio de fase implica rehacer lo construido.</p>
   <div class="phases">
-    <div class="phase"><span class="when">FASE 1 · go-live</span><b>Job de aprobación + post-liberación</b><span>Reemplazo exacto del job de ECC, sin costo adicional.</span></div>
-    <div class="phase"><span class="when">FASE 2 · opcional</span><b>Agente Joule supervisor</b><span>Reporta lo aprobado, los errores de MIGO y las OC fuera de rango.</span></div>
-    <div class="phase"><span class="when">FASE 3 · si el cliente lo pide</span><b>Agente como aprobador</b><span>Opción 2 completa, con la regla siempre en S/4.</span></div>
+    <div class="phase"><span class="when">FASE 1 · go-live</span><b>Opción 1: job aprueba + MIGO</b><span>Reemplazo exacto del job de ECC, sin costo adicional ni dependencia del otro equipo.</span></div>
+    <div class="phase"><span class="when">FASE 2 · cuando estén los BAdIs</span><b>Opción 3: el workflow libera</b><span>Se desactiva la fase de aprobación del job y se retira el wrapper de decisión. El job de MIGO sigue igual.</span></div>
+    <div class="phase"><span class="when">FASE 3 · opcional</span><b>Agente Joule supervisor</b><span>Reporta las OC liberadas, los errores de MIGO y las que quedaron fuera de rango.</span></div>
   </div>
 </section>
 
@@ -313,6 +394,8 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
     <li>Estado de <code>ZFMFI_CHECK_PO</code> (anticipo) y de la integración con Coupa (<code>ZMM_CREATE_COUPA_OC</code>)</li>
     <li>Tipo de OC: materiales o servicios (lean services usa hoja de entrada, no MIGO)</li>
     <li>Frecuencia mínima del Application Job y autorizaciones del usuario genérico</li>
+    <li>Opción 3: fecha estimada de los BAdIs del otro equipo y acuerdo para que llamen a <code>ZCL_MM_PO_APPROVAL_RULES</code></li>
+    <li>Opción 3: criterio para decidir qué OC liberadas llevan MIGO automática</li>
   </ul>
 </section>
 

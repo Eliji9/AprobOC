@@ -74,7 +74,45 @@ Método `cl_apr->m_process_data`, para cada OC pendiente (`gt_ekko`):
 Costo estimado (agente Standard, 0,01 AI Units por paso): cada 15 min ≈ 58 AI Units/mes solo en
 revisar; cada 1 min ≈ 860; más ≈ 0,04 por OC aprobada. Confirmar con el AI Unit Estimator.
 
-## 4. Prueba de la decisión sobre `TS00800531` (DS4)
+## 4. Opción 3 – BAdIs de Flexible Workflow + job de MIGO
+
+### Flujo
+
+1. **BAdI de condición (otro equipo):** `SWF_WORKFLOW_CONDITION_DEF/EVAL` define la condición
+   custom "Monto USD fuera del rango automático del nivel N", que llama a
+   `ZCL_MM_PO_APPROVAL_RULES`.
+2. **Flexible Workflow estándar:** cada paso solo se activa si se cumple la condición. Si ningún
+   paso aplica, el workflow libera la OC automáticamente, sin aprobador técnico.
+3. **Application Job (cada 1–5 min):** toma las OC liberadas y no procesadas que cumplen el
+   criterio de MIGO automática y ejecuta servicios múltiples, anticipo, Coupa y MIGO.
+
+### Objetos
+
+| Objeto | Tipo | Tier |
+|---|---|---|
+| `ZMM_PO_APPR_RULE` | Tabla BD + Business Configuration Maintenance Object | 1 |
+| `ZMM_PO_APPR_CTRL` | Tabla BD (control, idempotencia y auditoría) | 1 |
+| `ZCL_MM_PO_APPROVAL_RULES` | Clase ABAP, usada por el BAdI | 1 |
+| Implementación BAdI | `SWF_WORKFLOW_CONDITION_DEF/EVAL` (otro equipo) | 1 |
+| `ZCL_MM_PO_POSTREL_JOB` + catálogo + plantilla | Application Job | 1 |
+| Clase MIGO existente | Reutilizada (ABAP Cloud) | 1 |
+| Wrapper anticipo | Solo si `ZFMFI_CHECK_PO` sigue siendo clásica | 2 · C1 |
+
+### Puntos a definir
+
+- **Mapeo de rangos:** en ECC el bot liberaba si el monto estaba dentro del rango del código;
+  en Flexible Workflow el paso se activa cuando el monto está fuera del rango automático.
+- **Criterio de MIGO automática:** el job no sabe si la OC se liberó sola o la aprobó una persona.
+  Opciones: aplicar la misma regla de monto, o revisar si la OC tuvo pasos de aprobación manuales.
+- Si la OC cambia, el workflow se reinicia y la condición se vuelve a evaluar.
+
+### Transición desde la Opción 1
+
+Al activar los BAdIs se desactiva la fase de aprobación del job y se retira
+`ZCL_MM_WF_DECISION_API`. La clase de reglas, la tabla de control, el job de MIGO y la clase
+MIGO se mantienen sin cambios.
+
+## 5. Prueba de la decisión sobre `TS00800531` (DS4)
 
 1. Crear 2 OC que entren a aprobación; ubicar los work items en SWI1 (estado READY).
 2. **Prueba A (referencia):** `/IWFND/GW_CLIENT` con el usuario genérico →

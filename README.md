@@ -21,16 +21,24 @@ rangos de monto y luego ejecuta anticipo, integración con Coupa y MIGO.
 
 ## Opciones evaluadas
 
-| Criterio | Opción 1 · Application Job en S/4 | Opción 2 · Agente Joule Studio |
-|---|---|---|
-| Clean core | ≈ 85 % (Tier 1 + Tier 2) | ≈ 90 % (Tier 1 + BTP) |
-| Latencia de aprobación | 1–5 min | 5–15 min |
-| Costo incremental | Ninguno | AI Units + licencias |
-| Viabilidad | Alta | Media |
+| Criterio | Opción 1 · Job en S/4 | Opción 2 · Agente Joule | Opción 3 · BAdI + job MIGO |
+|---|---|---|---|
+| Quién libera | Usuario genérico admin. | Agente con usuario genérico | Workflow estándar |
+| Clean core | ≈ 85 % (T1 + T2) | ≈ 90 % (T1 + BTP) | ≈ 95 % (T1) |
+| Latencia de liberación | 1–5 min | 5–15 min | Inmediata |
+| Costo incremental | Ninguno | AI Units + licencias | Ninguno |
+| Dependencias | Ninguna | BTP, Joule, licencias | Equipo de BAdIs (meses) |
+| Viabilidad | Alta | Media | Alta, a mediano plazo |
 
-**Recomendación:** salir a productivo con la Opción 1 y dejar el agente Joule como
-evolución (supervisor de excepciones y, si el cliente lo pide, aprobador). Ambas opciones
-comparten la tabla de reglas, la clase de reglas, la tabla de control y la clase MIGO.
+**Recomendación:** usar la Opción 1 como puente hacia la Opción 3.
+
+1. **Go-live:** Opción 1 (el job aprueba y crea la MIGO).
+2. **Cuando el otro equipo libere los BAdIs:** Opción 3. Se desactiva la fase de aprobación
+   del job y se retira el wrapper de decisión; el job de MIGO sigue igual.
+3. **Opcional:** agente Joule como supervisor de excepciones.
+
+Las tres opciones comparten la tabla de reglas, la clase de reglas, la tabla de control y
+la clase MIGO, así que ningún cambio de fase implica rehacer lo construido.
 
 ## Estado
 
@@ -40,6 +48,8 @@ comparten la tabla de reglas, la clase de reglas, la tabla de control y la clase
 - [ ] Estado de `ZFMFI_CHECK_PO` (anticipo) y `ZMM_CREATE_COUPA_OC` (Coupa)
 - [ ] Tipo de OC: materiales o servicios (lean services)
 - [ ] Frecuencia mínima del Application Job y autorizaciones del usuario genérico
+- [ ] Opción 3: fecha de los BAdIs del otro equipo y acuerdo para que llamen a `ZCL_MM_PO_APPROVAL_RULES`
+- [ ] Opción 3: criterio para decidir qué OC liberadas llevan MIGO automática
 
 ## Estructura prevista
 
