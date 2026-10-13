@@ -28,7 +28,8 @@ MIGO) quedan fuera de alcance por ahora.
 |---|---|---|---|---|
 | Disponible hoy | No (config congelada) | Sí | Sí, con licencia | Sí, con licencias |
 | Toca el workflow | Configuración | No | No | No |
-| Clean core | 100 % estándar | ≈ 80 % | ≈ 100 % | ≈ 100 % |
+| Clean core | 100 % estándar | ≈ 80 % | ≈ 85–100 % | ≈ 85–100 % |
+| Acceso a la tarea | No aplica | Wrapper (reenvía y decide) | Sustitución, wrapper o API released | Sustitución, wrapper o API released |
 | Regla en USD | No, por moneda | Sí | Sí | Sí |
 | Latencia | Inmediata | 1–5 min | 5–15 min | 5–15 min |
 | Costo adicional | Ninguno | Ninguno | Licencia Build | Licencias + AI Units |
@@ -44,6 +45,8 @@ si el negocio quiere mantener los rangos en BTP y ya tiene licencia de Build.
 - [ ] Mapeo de rangos de `ZMM_COD_PED` a niveles del Flexible Workflow (negocio) — todas
 - [ ] Frecuencia mínima del Application Job y autorizaciones del usuario genérico — B
 - [ ] Licencia y subaccount de SAP Build Process Automation — C, D
+- [ ] Acceso del usuario técnico a las tareas: ¿auditoría acepta la sustitución? — C, D
+- [ ] API released para leer y decidir work items en Business Accelerator Hub — C, D
 - [ ] Fecha estimada de fin de las pruebas integrales del workflow — A
 - [ ] ¿El negocio acepta umbrales por moneda en lugar de USD? — A
 

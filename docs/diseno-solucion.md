@@ -46,7 +46,8 @@ Post-liberación en ECC (**fuera de alcance por ahora**): `ZMM_CREATE_COUPA_OC` 
 1. El Flexible Workflow genera la tarea `TS00800531` según la configuración actual (sin cambios).
 2. Un Application Job (cada 1–5 min, usuario genérico con perfil de administrador de workflow)
    busca las tareas abiertas y calcula el total en USD con la clase de reglas.
-3. Si cumple el rango del nivel, aprueba la tarea con el wrapper Tier 2; si no, queda manual.
+3. Si cumple el rango del nivel, el wrapper Tier 2 reenvía la tarea al usuario genérico (si no es
+   agente) y la aprueba; si no cumple, queda manual.
 4. Registra OC, nivel, monto USD y rango en el Application Log (`CL_BALI_LOG`).
 
 | Objeto | Tipo | Tier |
@@ -54,7 +55,7 @@ Post-liberación en ECC (**fuera de alcance por ahora**): `ZMM_CREATE_COUPA_OC` 
 | `ZMM_PO_APPR_RULE` | Tabla BD + Business Configuration Maintenance Object | 1 |
 | `ZCL_MM_PO_APPROVAL_RULES` | Clase ABAP (total USD con `PEINH`, sin borrados, tasa vigente; rango) | 1 |
 | `ZCL_MM_PO_APPR_JOB` | Clase de Application Job + catálogo + plantilla | 1 |
-| `ZCL_MM_WF_DECISION_API` | Clase wrapper (buscar tareas y aprobar), paquete Standard ABAP | 2 · C1 |
+| `ZCL_MM_WF_DECISION_API` | Clase wrapper (buscar tareas, reenviar y aprobar), paquete Standard ABAP | 2 · C1 |
 
 Fuentes de datos released: `I_PurchaseOrderAPI01`, `I_PurchaseOrderItemAPI01`.
 
@@ -70,6 +71,11 @@ Fuentes de datos released: `I_PurchaseOrderAPI01`, `I_PurchaseOrderItemAPI01`.
 | `ZR_MM_PO_TOTAL_USD` | CDS + servicio OData (total en USD) | 1 |
 | `TASKPROCESSING` | Servicio estándar de My Inbox | Estándar |
 | Proceso, tabla de decisión, destino, Actions | SAP Build Process Automation | BTP |
+| `ZR_MM_PO_APPROVE` | Servicio RAP con acción "aprobar" (solo si no se usa sustitución) | 1 |
+| `ZCL_MM_WF_DECISION_API` | Clase wrapper (solo si no se usa sustitución) | 2 · C1 |
+
+Clean core: ≈ 100 % con sustitución o API released; ≈ 85 % si se necesita el wrapper.
+Ver la sección 7 para el mecanismo de aprobación.
 
 ## 6. Opción D – Agente Joule Studio vía Build Process Automation
 
@@ -78,21 +84,55 @@ Fuentes de datos released: `I_PurchaseOrderAPI01`, `I_PurchaseOrderItemAPI01`.
    `ZCL_MM_PO_APPROVAL_RULES`), aprobar (`Decision`).
 3. La IA no decide montos ni rangos; la evaluación se hace siempre en S/4.
 
+Mismo mecanismo de aprobación y mismo condicionante que la opción C (sección 7). Si el usuario
+técnico no puede ser agente, se agrega `ZCL_MM_WF_DECISION_API` (Tier 2). Clean core ≈ 85–100 %.
+
 Costo estimado (agente Standard, 0,01 AI Units por paso): cada 15 min ≈ 58 AI Units/mes solo en
 revisar; cada 5 min ≈ 173; más ≈ 0,04 por OC aprobada. Confirmar con el AI Unit Estimator.
 
-## 7. Recomendación
+## 7. Cómo aprueban las opciones C y D
+
+Ambas llaman desde BTP, con un destino y un usuario técnico, al mismo servicio que usa My Inbox:
+
+```
+BTP (Build) ──destino──► S/4: /sap/opu/odata/IWPGW/TASKPROCESSING;mo;v=2
+                             1. GET  TaskCollection   → tareas READY de TS00800531
+                             2. GET  DecisionOptions  → clave de "Aprobar"
+                             3. POST Decision         → aprueba con comentario
+```
+
+- Conexión: destino BTP hacia S/4 (Cloud Connector o conexión privada de RISE; confirmar con Basis).
+- Autenticación: usuario técnico (básica u OAuth); sin principal propagation porque es desatendido.
+- El POST de `Decision` requiere token CSRF; las Actions de Build lo obtienen si se configuran.
+- El historial de la OC muestra al usuario técnico como aprobador, con el comentario enviado.
+- En C lo orquesta un proceso con pasos fijos; en D, un agente con tres skills (buscar, evaluar, aprobar).
+
+### Punto crítico: acceso a la tarea
+
+`TASKPROCESSING` es el inbox del usuario conectado: `TaskCollection` solo devuelve las tareas
+donde ese usuario es agente. Un administrador no ve tareas ajenas por esta vía, y la configuración
+del workflow está congelada.
+
+| Camino | Cómo | Impacto |
+|---|---|---|
+| Sustitución | Cada aprobador define al usuario técnico como su sustituto | Sin código; depende de cada aprobador y de auditoría · ≈ 100 % |
+| Servicio custom en S/4 | Acción RAP "aprobar" que reenvía la tarea al usuario técnico y decide | Usa el wrapper Tier 2 de la opción B · ≈ 85 % |
+| API released de work items | Verificar en Business Accelerator Hub si el release la ofrece | La mejor vía si existe; por confirmar |
+
+## 8. Recomendación
 
 1. **Ahora:** opción B, tras la prueba de concepto.
 2. **Al terminar las pruebas integrales:** evaluar migrar a la opción A si el negocio acepta
    umbrales por moneda; se retiran el job y el wrapper.
 3. **Alternativa:** opción C si el negocio quiere mantener los rangos en BTP y tiene licencia de Build.
 
-## 8. Prueba de concepto de la decisión sobre `TS00800531` (DS4)
+## 9. Prueba de concepto de la decisión sobre `TS00800531` (DS4)
 
 1. Crear 2 OC que entren a aprobación; ubicar los work items en SWI1 (estado READY).
 2. **Prueba A (referencia):** `/IWFND/GW_CLIENT` con el usuario genérico →
    `TaskCollection` → `DecisionOptions` → `POST Decision`.
+   - Si `TaskCollection` sale vacío, el usuario genérico no es agente de la tarea (comportamiento
+     esperado). Repetir asignándolo como sustituto de un aprobador.
 3. **Prueba B (wrapper):** `SAP_WAPI_DECISION_COMPLETE` con el usuario genérico.
 4. Validar: OC liberada, `EKKO-PROCSTAT = '05'`, work item COMPLETED, historial de aprobación.
 5. Si A libera y B no, depurar la Prueba A para identificar la lógica que debe envolver el wrapper.

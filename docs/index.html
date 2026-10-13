@@ -146,6 +146,17 @@ td.obj{font-family:var(--mono);font-size:.8rem;word-break:break-word}
 .phase b{font-size:.92rem}
 .phase .when{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
 
+.how{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.how .lead2{color:var(--muted);font-size:.92rem;max-width:80ch}
+.calls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:760px){.calls{grid-template-columns:1fr}}
+.call{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg);display:flex;flex-direction:column;gap:3px;min-width:0}
+.call .verb{font-family:var(--mono);font-size:.72rem;font-weight:600;color:var(--blue)}
+.call b{font-family:var(--mono);font-size:.86rem;word-break:break-word}
+.call span{font-size:.84rem;color:var(--muted)}
+.warnbox{border-left:4px solid var(--warn);background:var(--warn-soft);border-radius:6px;padding:12px 14px;font-size:.9rem;display:flex;flex-direction:column;gap:4px}
+.warnbox b{color:var(--warn)}
+
 .pend{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
 .pend ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;font-size:.88rem}
 .pend .for{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-left:4px}
@@ -268,7 +279,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <ol class="flow">
         <li><div><span class="where">S/4 · Flexible Workflow (sin cambios)</span><span class="what">La OC entra a aprobación según la configuración actual.</span></div></li>
         <li><div><span class="where">S/4 · Application Job, cada 1–5 min</span><span class="what">Busca tareas TS00800531 abiertas y calcula el total en USD con la clase de reglas.</span></div></li>
-        <li><div><span class="where">S/4 · Wrapper Tier 2</span><span class="what">Si cumple el rango del nivel, aprueba la tarea. Si no, queda para aprobación manual.</span></div></li>
+        <li><div><span class="where">S/4 · Wrapper Tier 2</span><span class="what">Si cumple el rango del nivel, reenvía la tarea al usuario genérico (si no es agente) y la aprueba. Si no cumple, queda para aprobación manual.</span></div></li>
         <li><div><span class="where">S/4 · Application Log</span><span class="what">Registra OC, nivel, monto USD y rango aplicado.</span></div></li>
       </ol>
     </div>
@@ -280,7 +291,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
           <tr><td class="obj">ZMM_PO_APPR_RULE</td><td>Tabla BD + mantenimiento de configuración</td><td><span class="tier t1">T1</span></td></tr>
           <tr><td class="obj">ZCL_MM_PO_APPROVAL_RULES</td><td>Clase ABAP (total USD y rango)</td><td><span class="tier t1">T1</span></td></tr>
           <tr><td class="obj">ZCL_MM_PO_APPR_JOB</td><td>Clase de Application Job + catálogo + plantilla</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZCL_MM_WF_DECISION_API</td><td>Clase wrapper (buscar tareas y aprobar)</td><td><span class="tier t2">T2 · C1</span></td></tr>
+          <tr><td class="obj">ZCL_MM_WF_DECISION_API</td><td>Clase wrapper (buscar tareas, reenviar y aprobar)</td><td><span class="tier t2">T2 · C1</span></td></tr>
         </tbody>
       </table></div>
     </div>
@@ -332,7 +343,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
         <li><div><span class="where">S/4 · Flexible Workflow (sin cambios)</span><span class="what">La OC entra a aprobación según la configuración actual.</span></div></li>
         <li><div><span class="where">BTP · Proceso programado, cada 5–15 min</span><span class="what">Lee las tareas pendientes con <code>TASKPROCESSING</code> y el total USD con un servicio de S/4.</span></div></li>
         <li><div><span class="where">BTP · Tabla de decisión de Build</span><span class="what">Evalúa nivel y monto contra los rangos que define el negocio.</span></div></li>
-        <li><div><span class="where">BTP → S/4 · Destino</span><span class="what">Si cumple, aprueba con <code>Decision</code> usando el usuario técnico.</span></div></li>
+        <li><div><span class="where">BTP → S/4 · Destino</span><span class="what">Si cumple, aprueba con <code>Decision</code> usando el usuario técnico. Ver "Cómo aprueban C y D".</span></div></li>
       </ol>
     </div>
     <div class="sec">
@@ -345,15 +356,17 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
           <tr><td class="obj">Proceso programado</td><td>SAP Build Process Automation</td><td><span class="tier sbs">BTP</span></td></tr>
           <tr><td class="obj">Tabla de decisión</td><td>Regla de negocio de Build</td><td><span class="tier sbs">BTP</span></td></tr>
           <tr><td class="obj">Destino + Actions</td><td>BTP Destination + SAP Build Actions</td><td><span class="tier sbs">BTP</span></td></tr>
+          <tr><td class="obj">ZR_MM_PO_APPROVE</td><td>Servicio RAP con acción "aprobar" · solo si no se usa sustitución</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">ZCL_MM_WF_DECISION_API</td><td>Clase wrapper · solo si no se usa sustitución</td><td><span class="tier t2">T2 · C1</span></td></tr>
         </tbody>
       </table></div>
     </div>
     <div class="sec meter">
       <h3>Clean core</h3>
-      <div class="big">≈ 100 %<small>Tier 1 + side-by-side</small></div>
-      <div class="bar" aria-label="20% Tier 1, 80% side-by-side"><span class="b1" style="width:20%"></span><span class="bs" style="width:80%"></span></div>
-      <div class="legend"><span><i style="background:var(--t1)"></i>Tier 1 · ABAP Cloud</span><span><i style="background:var(--warn)"></i>Side-by-side · BTP</span></div>
-      <p class="note">Por qué: la aprobación sale del núcleo hacia BTP y usa servicios estándar. En S/4 solo queda un servicio de lectura en ABAP Cloud.</p>
+      <div class="big">≈ 85–100 %<small>según el acceso a la tarea</small></div>
+      <div class="bar" aria-label="20% Tier 1, 65% side-by-side, 15% Tier 2 condicional"><span class="b1" style="width:20%"></span><span class="bs" style="width:65%"></span><span class="b2" style="width:15%;opacity:.5"></span></div>
+      <div class="legend"><span><i style="background:var(--t1)"></i>Tier 1 · ABAP Cloud</span><span><i style="background:var(--warn)"></i>Side-by-side · BTP</span><span><i style="background:var(--t2);opacity:.5"></i>Tier 2 · solo si hay wrapper</span></div>
+      <p class="note">Por qué: con sustitución o una API released de work items, todo es estándar y side-by-side (≈ 100 %). Si el usuario técnico no puede ser agente, la aprobación necesita el mismo wrapper Tier 2 de la opción B (≈ 85 %).</p>
     </div>
     <div class="sec">
       <h3>Pros y contras</h3>
@@ -369,6 +382,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
           <li>Más piezas: BTP, destino, usuario técnico</li>
           <li>Mayor latencia que el job</li>
           <li>Usuario técnico aprobando, igual que B</li>
+          <li>El usuario técnico no ve tareas ajenas: requiere sustitución o wrapper</li>
         </ul></div>
       </div>
     </div>
@@ -378,6 +392,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <ul>
         <li>Confirmar licencia y subaccount de Build Process Automation</li>
         <li>La prueba de concepto de <code>TASKPROCESSING</code> con usuario técnico aplica igual</li>
+        <li>Definir el acceso a la tarea: sustitución, wrapper o API released</li>
         <li>Validar la frecuencia mínima del disparador programado</li>
       </ul>
     </div>
@@ -409,15 +424,16 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
           <tr><td class="obj">TASKPROCESSING</td><td>Servicio estándar de My Inbox</td><td><span class="tier std">Estándar</span></td></tr>
           <tr><td class="obj">Agente + 3 skills</td><td>Joule Studio (buscar, evaluar, aprobar)</td><td><span class="tier sbs">BTP</span></td></tr>
           <tr><td class="obj">Proceso + destino</td><td>Build Process Automation + Destination</td><td><span class="tier sbs">BTP</span></td></tr>
+          <tr><td class="obj">ZCL_MM_WF_DECISION_API</td><td>Clase wrapper · solo si no se usa sustitución</td><td><span class="tier t2">T2 · C1</span></td></tr>
         </tbody>
       </table></div>
     </div>
     <div class="sec meter">
       <h3>Clean core</h3>
-      <div class="big">≈ 100 %<small>Tier 1 + side-by-side</small></div>
-      <div class="bar" aria-label="50% Tier 1, 50% side-by-side"><span class="b1" style="width:50%"></span><span class="bs" style="width:50%"></span></div>
-      <div class="legend"><span><i style="background:var(--t1)"></i>Tier 1 · ABAP Cloud</span><span><i style="background:var(--warn)"></i>Side-by-side · BTP</span></div>
-      <p class="note">Por qué: no necesita wrappers. Un porcentaje alto no significa una solución simple: tiene más plataformas que cualquier otra opción.</p>
+      <div class="big">≈ 85–100 %<small>según el acceso a la tarea</small></div>
+      <div class="bar" aria-label="45% Tier 1, 40% side-by-side, 15% Tier 2 condicional"><span class="b1" style="width:45%"></span><span class="bs" style="width:40%"></span><span class="b2" style="width:15%;opacity:.5"></span></div>
+      <div class="legend"><span><i style="background:var(--t1)"></i>Tier 1 · ABAP Cloud</span><span><i style="background:var(--warn)"></i>Side-by-side · BTP</span><span><i style="background:var(--t2);opacity:.5"></i>Tier 2 · solo si hay wrapper</span></div>
+      <p class="note">Por qué: igual que C. Con sustitución o API released no hay wrappers; si el usuario técnico no puede ser agente, se necesita el wrapper. Un porcentaje alto no significa una solución simple: es la opción con más plataformas.</p>
     </div>
     <div class="sec">
       <h3>Pros y contras</h3>
@@ -432,6 +448,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
           <li>Consume AI Units aunque no haya OC pendientes</li>
           <li>Licencias de Build, Joule y AI Units</li>
           <li>La más compleja de operar y auditar</li>
+          <li>El usuario técnico no ve tareas ajenas: requiere sustitución o wrapper</li>
         </ul></div>
       </div>
     </div>
@@ -441,10 +458,33 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <ul>
         <li>Costo estimado (agente Standard, 0,01 AI Units/paso): cada 15 min ≈ <b>58 AI Units/mes</b> solo en revisar; cada 5 min ≈ <b>173</b>; más ≈ 0,04 por OC aprobada</li>
         <li>El disparo desatendido pasa por Build Process Automation</li>
+        <li>Definir el acceso a la tarea: sustitución, wrapper o API released</li>
       </ul>
     </div>
   </section>
 </div>
+
+<section class="how" aria-label="Cómo aprueban las opciones C y D">
+  <h2>Cómo aprueban C y D</h2>
+  <p class="lead2">Las dos usan el mismo servicio que My Inbox, llamado desde BTP con un destino y un usuario técnico. En C lo orquesta un proceso con pasos fijos; en D, un agente. El historial de la OC muestra al usuario técnico como aprobador, con el comentario que se envíe.</p>
+  <div class="calls">
+    <div class="call"><span class="verb">1 · GET</span><b>TaskCollection</b><span>Tareas READY de TS00800531</span></div>
+    <div class="call"><span class="verb">2 · GET</span><b>DecisionOptions</b><span>Clave de la decisión "Aprobar"</span></div>
+    <div class="call"><span class="verb">3 · POST</span><b>Decision</b><span>Aprueba con comentario (requiere token CSRF)</span></div>
+  </div>
+  <div class="warnbox">
+    <b>Punto crítico</b>
+    <span><code>TASKPROCESSING</code> es el inbox del usuario conectado: solo devuelve las tareas donde ese usuario es agente. Un usuario administrador no ve las tareas de otros por esta vía, y la configuración del workflow está congelada, así que no se puede agregar como aprobador.</span>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Camino de acceso a la tarea</th><th>Cómo</th><th>Impacto</th></tr></thead>
+    <tbody>
+      <tr><td>Sustitución</td><td>Cada aprobador define al usuario técnico como su sustituto</td><td>Sin código; depende de cada aprobador y de auditoría · clean core ≈ 100 %</td></tr>
+      <tr><td>Servicio custom en S/4</td><td>Acción RAP "aprobar" que reenvía la tarea al usuario técnico y decide</td><td>Usa el wrapper Tier 2 de la opción B · clean core ≈ 85 %</td></tr>
+      <tr><td>API released de work items</td><td>Verificar en Business Accelerator Hub si el release la ofrece</td><td>La mejor vía si existe · por confirmar en el sistema</td></tr>
+    </tbody>
+  </table></div>
+</section>
 
 <section class="compare">
   <h2>Comparativo rápido</h2>
@@ -454,7 +494,8 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <tr><td>Disponible hoy</td><td>No (configuración congelada)</td><td class="win">Sí</td><td>Sí, con licencia</td><td>Sí, con licencias</td></tr>
       <tr><td>Toca el workflow</td><td>Configuración</td><td class="win">No</td><td class="win">No</td><td class="win">No</td></tr>
       <tr><td>Código propio</td><td class="win">Ninguno</td><td>4 objetos</td><td>1 servicio + BTP</td><td>3 objetos + BTP</td></tr>
-      <tr><td>Clean core</td><td class="win">100 % estándar</td><td>≈ 80 %</td><td>≈ 100 %</td><td>≈ 100 %</td></tr>
+      <tr><td>Clean core</td><td class="win">100 % estándar</td><td>≈ 80 %</td><td>≈ 85–100 %</td><td>≈ 85–100 %</td></tr>
+      <tr><td>Acceso a la tarea</td><td>No aplica</td><td>Wrapper (reenvía y decide)</td><td>Sustitución, wrapper o API released</td><td>Sustitución, wrapper o API released</td></tr>
       <tr><td>Regla en USD</td><td>No, por moneda</td><td class="win">Sí</td><td class="win">Sí</td><td class="win">Sí</td></tr>
       <tr><td>Quién libera</td><td class="win">El workflow</td><td>Usuario genérico admin.</td><td>Usuario técnico vía BTP</td><td>Usuario técnico vía BTP</td></tr>
       <tr><td>Quién mantiene la regla</td><td>Admin. de workflow</td><td>Negocio (app de configuración)</td><td class="win">Negocio (tabla de Build)</td><td>Negocio / desarrollo</td></tr>
@@ -478,7 +519,9 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
 <section class="pend">
   <h2>Validaciones pendientes</h2>
   <ul>
-    <li>Prueba de concepto de la decisión sobre TS00800531: <code>TASKPROCESSING</code> y <code>SAP_WAPI_DECISION_COMPLETE</code> <span class="for">B · C · D</span></li>
+    <li>Prueba de concepto de la decisión sobre TS00800531: <code>TASKPROCESSING</code> y <code>SAP_WAPI_DECISION_COMPLETE</code>. Si <code>TaskCollection</code> sale vacío, el usuario no es agente: probar como sustituto de un aprobador <span class="for">B · C · D</span></li>
+    <li>Acceso del usuario técnico a las tareas: ¿auditoría acepta la sustitución? <span class="for">C · D</span></li>
+    <li>Verificar en Business Accelerator Hub si hay una API released para leer y decidir work items <span class="for">C · D</span></li>
     <li>Mapeo de los rangos de <code>ZMM_COD_PED</code> (por código de liberación) a niveles del Flexible Workflow <span class="for">todas</span></li>
     <li>Frecuencia mínima del Application Job y autorizaciones del usuario genérico <span class="for">B</span></li>
     <li>Licencia y subaccount de SAP Build Process Automation <span class="for">C · D</span></li>
