@@ -4,110 +4,45 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: encabezado → comparativo rápido → dos columnas de opción (apiladas en móvil) → tabla → recomendación */
+/* Layout: encabezado → secuencia ECC → 4 opciones en rejilla 2×2 (1 columna en móvil) → comparativo → recomendación → pendientes */
 :root{
   --bg:#f6f8fb; --surface:#ffffff; --fg:#14213a; --muted:#56637a; --line:#dde3ec;
   --blue:#0a5bb5; --blue-soft:#e6effa; --teal:#0b8a83; --teal-soft:#e2f4f2;
+  --violet:#5b4bb7; --violet-soft:#ece9f8; --slate:#4a5a74; --slate-soft:#e8ecf2;
   --good:#1f7a3f; --good-soft:#e5f4ea; --warn:#9a5b00; --warn-soft:#fbf0dc; --bad:#b3261e; --bad-soft:#fbe7e5;
-  --t1:#0b8a83; --t2:#0a5bb5; --t3:#b3261e;
+  --t1:#0b8a83; --t2:#0a5bb5;
   --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0d1420; --surface:#141d2c; --fg:#e4eaf3; --muted:#9aa7bb; --line:#26324a;
   --blue:#6aa8f0; --blue-soft:#16294a; --teal:#4fc7bd; --teal-soft:#103633;
+  --violet:#a99cf0; --violet-soft:#241f45; --slate:#a9b6cc; --slate-soft:#1f2a3c;
   --good:#6fcf8f; --good-soft:#143322; --warn:#f0b65a; --warn-soft:#3a2a10; --bad:#f2867d; --bad-soft:#3d1a18;
-  --t1:#4fc7bd; --t2:#6aa8f0; --t3:#f2867d; color-scheme:dark}}
+  --t1:#4fc7bd; --t2:#6aa8f0; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0d1420; --surface:#141d2c; --fg:#e4eaf3; --muted:#9aa7bb; --line:#26324a;
   --blue:#6aa8f0; --blue-soft:#16294a; --teal:#4fc7bd; --teal-soft:#103633;
+  --violet:#a99cf0; --violet-soft:#241f45; --slate:#a9b6cc; --slate-soft:#1f2a3c;
   --good:#6fcf8f; --good-soft:#143322; --warn:#f0b65a; --warn-soft:#3a2a10; --bad:#f2867d; --bad-soft:#3d1a18;
-  --t1:#4fc7bd; --t2:#6aa8f0; --t3:#f2867d; color-scheme:dark}
+  --t1:#4fc7bd; --t2:#6aa8f0; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.55;padding:0 16px}
-.wrap{max-width:1360px;margin:0 auto;padding-block:28px 56px;display:flex;flex-direction:column;gap:28px}
+.wrap{max-width:1240px;margin:0 auto;padding-block:28px 56px;display:flex;flex-direction:column;gap:28px}
 h1,h2,h3{text-wrap:balance;margin:0;line-height:1.2}
 h1{font-size:clamp(1.6rem,3.4vw,2.2rem);font-weight:700;letter-spacing:-.01em}
 h2{font-size:1.25rem;font-weight:600}
 h3{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 p{margin:0}
-code,.mono{font-family:var(--mono);font-size:.86em}
+code{font-family:var(--mono);font-size:.86em}
 .eyebrow{font-family:var(--mono);font-size:.78rem;color:var(--blue);letter-spacing:.04em}
 header{display:flex;flex-direction:column;gap:10px;border-bottom:2px solid var(--blue);padding-bottom:20px}
-header .lead{color:var(--muted);max-width:70ch}
+header .lead{color:var(--muted);max-width:75ch}
 .ctx{display:flex;flex-wrap:wrap;gap:8px}
 .chip{font-size:.78rem;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;color:var(--muted)}
 .chip b{color:var(--fg);font-weight:600}
-
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
-@media (max-width:1180px){.grid{grid-template-columns:1fr}}
-.opt{background:var(--surface);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;min-width:0}
-.opt-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
-.opt.o1 .opt-head{border-top:4px solid var(--teal);border-radius:10px 10px 0 0}
-.opt.o2 .opt-head{border-top:4px solid var(--blue);border-radius:10px 10px 0 0}
-.tag{align-self:flex-start;font-family:var(--mono);font-size:.74rem;font-weight:500;padding:2px 8px;border-radius:4px}
-.o1 .tag{background:var(--teal-soft);color:var(--teal)}
-.o2 .tag{background:var(--blue-soft);color:var(--blue)}
-.opt.o3 .opt-head{border-top:4px solid var(--good);border-radius:10px 10px 0 0}
-.o3 .tag{background:var(--good-soft);color:var(--good)}
-.o3 .flow{--accent:var(--good)}
-.pill.plazo{background:var(--blue-soft);color:var(--blue)}
-.opt-head p{color:var(--muted);font-size:.92rem}
-.sec{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px;min-width:0}
-.sec:last-child{border-bottom:0}
-
-.flow{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0}
-.flow li{display:grid;grid-template-columns:22px 1fr;gap:10px;position:relative;padding-bottom:12px}
-.flow li:last-child{padding-bottom:0}
-.flow li::before{content:"";width:10px;height:10px;border-radius:50%;margin:6px 0 0 6px;background:var(--surface);border:2px solid var(--accent,var(--teal))}
-.flow li:not(:last-child)::after{content:"";position:absolute;left:10.5px;top:20px;bottom:0;width:2px;background:var(--line)}
-.o2 .flow{--accent:var(--blue)}
-.flow .where{font-family:var(--mono);font-size:.72rem;color:var(--muted);display:block}
-.flow .what{font-size:.92rem}
-
-.tbl-wrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:.86rem}
-th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
-td.obj{font-family:var(--mono);font-size:.8rem;word-break:break-word}
-.tier{font-family:var(--mono);font-size:.72rem;font-weight:500;padding:1px 6px;border-radius:4px;white-space:nowrap}
-.tier.t1{background:var(--teal-soft);color:var(--t1)}
-.tier.t2{background:var(--blue-soft);color:var(--t2)}
-.tier.sbs{background:var(--warn-soft);color:var(--warn)}
-.tier.std{background:var(--good-soft);color:var(--good)}
-
-.meter{display:flex;flex-direction:column;gap:8px}
-.bar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line)}
-.bar span{display:block;height:100%}
-.bar .b1{background:var(--t1)} .bar .b2{background:var(--t2)} .bar .bs{background:var(--warn)}
-.big{font-size:1.8rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
-.big small{font-size:.85rem;font-weight:500;color:var(--muted);margin-left:6px}
-.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.78rem;color:var(--muted)}
-.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
-.note{font-size:.82rem;color:var(--muted)}
-
-.pc{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:520px){.pc{grid-template-columns:1fr}}
-.pc ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;font-size:.88rem}
-.pc .pro h3{color:var(--good)} .pc .con h3{color:var(--bad)}
-
-.via{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.pill{font-size:.8rem;font-weight:600;padding:3px 10px;border-radius:999px}
-.pill.alta{background:var(--good-soft);color:var(--good)}
-.pill.media{background:var(--warn-soft);color:var(--warn)}
-.via ul{margin:0;padding-left:18px;font-size:.88rem;display:flex;flex-direction:column;gap:4px;width:100%}
-
-.compare{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
-.compare td:first-child{color:var(--muted);font-weight:500;white-space:nowrap}
-.win{color:var(--good);font-weight:600}
-
-.reco{border:2px solid var(--teal);background:var(--teal-soft);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:12px}
-.reco h2{color:var(--teal)}
-.phases{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-@media (max-width:820px){.phases{grid-template-columns:1fr}}
-.phase{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;font-size:.88rem}
-.phase b{font-size:.92rem}
-.phase .when{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.chip.alert{border-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
+.chip.alert b{color:var(--warn)}
 
 /* Secuencia ECC */
 .ecc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:16px}
@@ -115,11 +50,13 @@ td.obj{font-family:var(--mono);font-size:.8rem;word-break:break-word}
 .ecc-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.76rem;color:var(--muted)}
 .lanes{display:grid;grid-template-columns:minmax(0,.8fr) auto minmax(0,1.3fr) auto minmax(0,1.3fr);gap:10px;align-items:start}
 @media (max-width:900px){.lanes{grid-template-columns:1fr}.lane-arrow{transform:rotate(90deg);justify-self:center}}
-.lane{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:0;min-width:0;background:var(--bg)}
+.lane{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;min-width:0;background:var(--bg)}
 .lane.loop{border:2px dashed var(--blue)}
-.lane-h{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:10px}
+.lane.off{opacity:.55;border-style:dotted}
+.lane-h{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap}
 .lane-h b{font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
 .loop-badge{font-size:.72rem;font-weight:600;color:var(--blue);background:var(--blue-soft);padding:2px 8px;border-radius:999px;white-space:nowrap}
+.off-badge{font-size:.72rem;font-weight:600;color:var(--muted);background:var(--line);padding:2px 8px;border-radius:999px;white-space:nowrap}
 .lane-arrow{align-self:center;color:var(--muted);font-size:1.4rem;line-height:1}
 .step{display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:center;position:relative;padding-bottom:14px}
 .step:last-child{padding-bottom:0}
@@ -136,8 +73,82 @@ td.obj{font-family:var(--mono);font-size:.8rem;word-break:break-word}
 .t-no{font-size:.68rem;font-weight:600;padding:1px 6px;border-radius:4px;background:var(--line);color:var(--muted)}
 .t-bad{font-size:.68rem;font-weight:600;padding:1px 6px;border-radius:4px;background:var(--bad-soft);color:var(--bad)}
 
+/* Opciones */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.opt{background:var(--surface);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;min-width:0;--accent:var(--teal);--accent-soft:var(--teal-soft)}
+.opt.oa{--accent:var(--slate);--accent-soft:var(--slate-soft)}
+.opt.ob{--accent:var(--teal);--accent-soft:var(--teal-soft)}
+.opt.oc{--accent:var(--violet);--accent-soft:var(--violet-soft)}
+.opt.od{--accent:var(--blue);--accent-soft:var(--blue-soft)}
+.opt-head{padding:18px 20px;border-bottom:1px solid var(--line);border-top:4px solid var(--accent);border-radius:10px 10px 0 0;display:flex;flex-direction:column;gap:6px}
+.head-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tag{font-family:var(--mono);font-size:.74rem;font-weight:500;padding:2px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent)}
+.state{font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:999px}
+.state.blocked{background:var(--warn-soft);color:var(--warn)}
+.state.reco{background:var(--good-soft);color:var(--good)}
+.opt-head p{color:var(--muted);font-size:.92rem}
+.sec{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px;min-width:0}
+.sec:last-child{border-bottom:0}
+
+.flow{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.flow li{display:grid;grid-template-columns:22px 1fr;gap:10px;position:relative;padding-bottom:12px}
+.flow li:last-child{padding-bottom:0}
+.flow li::before{content:"";width:10px;height:10px;border-radius:50%;margin:6px 0 0 6px;background:var(--surface);border:2px solid var(--accent)}
+.flow li:not(:last-child)::after{content:"";position:absolute;left:10.5px;top:20px;bottom:0;width:2px;background:var(--line)}
+.flow .where{font-family:var(--mono);font-size:.72rem;color:var(--muted);display:block}
+.flow .what{font-size:.92rem}
+
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.obj{font-family:var(--mono);font-size:.8rem;word-break:break-word}
+.tier{font-family:var(--mono);font-size:.72rem;font-weight:500;padding:1px 6px;border-radius:4px;white-space:nowrap}
+.tier.t1{background:var(--teal-soft);color:var(--t1)}
+.tier.t2{background:var(--blue-soft);color:var(--t2)}
+.tier.sbs{background:var(--warn-soft);color:var(--warn)}
+.tier.std{background:var(--good-soft);color:var(--good)}
+.empty{font-size:.88rem;color:var(--muted);padding:10px 12px;border:1px dashed var(--line);border-radius:8px}
+
+.meter{display:flex;flex-direction:column;gap:8px}
+.bar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line)}
+.bar span{display:block;height:100%}
+.bar .b1{background:var(--t1)} .bar .b2{background:var(--t2)} .bar .bs{background:var(--warn)} .bar .bstd{background:var(--good)}
+.big{font-size:1.8rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.big small{font-size:.85rem;font-weight:500;color:var(--muted);margin-left:6px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.note{font-size:.82rem;color:var(--muted)}
+
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:520px){.pc{grid-template-columns:1fr}}
+.pc ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;font-size:.88rem}
+.pc .pro h3{color:var(--good)} .pc .con h3{color:var(--bad)}
+
+.via{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{font-size:.8rem;font-weight:600;padding:3px 10px;border-radius:999px}
+.pill.alta{background:var(--good-soft);color:var(--good)}
+.pill.media{background:var(--warn-soft);color:var(--warn)}
+.pill.baja{background:var(--bad-soft);color:var(--bad)}
+.pill.bloq{background:var(--slate-soft);color:var(--slate)}
+.via ul{margin:0;padding-left:18px;font-size:.88rem;display:flex;flex-direction:column;gap:4px;width:100%}
+
+.compare{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.compare td:first-child{color:var(--muted);font-weight:500;white-space:nowrap}
+.win{color:var(--good);font-weight:600}
+
+.reco{border:2px solid var(--teal);background:var(--teal-soft);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.reco h2{color:var(--teal)}
+.phases{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:820px){.phases{grid-template-columns:1fr}}
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;font-size:.88rem}
+.phase b{font-size:.92rem}
+.phase .when{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+
 .pend{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
 .pend ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;font-size:.88rem}
+.pend .for{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-left:4px}
 footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
 </style>
 
@@ -147,12 +158,12 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
 <header>
   <span class="eyebrow">Migración ECC → S/4HANA Cloud Private · Clean Core</span>
   <h1>Liberación automática de órdenes de compra</h1>
-  <p class="lead">Reemplazo del include <code>ZMM_APR_PED_BOT</code> (job de ECC que libera OC por rangos de monto con <code>BAPI_PO_RELEASE</code> y luego ejecuta anticipo, MIGO y Coupa). En S/4 la liberación se hace con Flexible Workflow. Se comparan tres opciones: dos que no tocan su configuración ni los BAdIs del otro equipo, y una que se apoya en esos BAdIs cuando estén listos.</p>
+  <p class="lead">Reemplazo del include <code>ZMM_APR_PED_BOT</code>, el job de ECC que libera OC por rangos de monto con <code>BAPI_PO_RELEASE</code>. En S/4 la liberación se hace con Flexible Workflow. Se comparan cuatro opciones de aprobación automática que no usan BAdIs.</p>
   <div class="ctx">
-    <span class="chip">Aprobador: <b>usuario genérico admin. de workflow</b></span>
-    <span class="chip">Tarea: <b>TS00800531</b></span>
-    <span class="chip">MIGO: <b>≤ 1–2 min tras aprobación</b></span>
-    <span class="chip">BAdIs de workflow: <b>a cargo de otro equipo</b></span>
+    <span class="chip">Alcance: <b>solo aprobación automática</b></span>
+    <span class="chip">Post-liberación (Coupa, anticipo, MIGO): <b>fuera de alcance por ahora</b></span>
+    <span class="chip">Tarea de aprobación: <b>TS00800531</b></span>
+    <span class="chip alert">Configuración del Flexible Workflow: <b>congelada por pruebas integrales</b></span>
   </div>
 </header>
 
@@ -165,15 +176,12 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
     </div>
   </div>
   <div class="lanes">
-
     <div class="lane">
       <div class="lane-h"><b>Inicio</b></div>
       <div class="step"><span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><div class="st-txt"><b>Job ECC</b><code>2 veces al día</code></div></div>
       <div class="step"><span class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 4v16"/></svg></span><div class="st-txt"><b>OC pendientes</b><code>EKKO · EKPO</code></div></div>
     </div>
-
     <span class="lane-arrow" aria-hidden="true">➜</span>
-
     <div class="lane loop">
       <div class="lane-h"><b>Liberación</b><span class="loop-badge">↻ por cada código</span></div>
       <div class="step"><span class="ico"><svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v3"/></svg></span><div class="st-txt"><b>Siguiente código</b><code>T16FS · FRGC1…8</code></div></div>
@@ -182,242 +190,257 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <div class="step dec"><span class="ico"><svg viewBox="0 0 24 24"><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7v.5M12 17h.01"/></svg></span><div class="st-txt"><b>¿Dentro del rango?</b><code>valfrom – valto</code><span class="tags"><span class="t-no">No → queda manual</span></span></div></div>
       <div class="step act"><span class="ico"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><div class="st-txt"><b>Liberar</b><code>BAPI_PO_RELEASE</code><span class="tags"><span class="t-bad">WAIT 5 s</span></span></div></div>
     </div>
-
     <span class="lane-arrow" aria-hidden="true">➜</span>
-
-    <div class="lane">
-      <div class="lane-h"><b>Post-liberación</b></div>
-      <div class="step act"><span class="ico"><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-8 6 6 0 0 1 11.5 1.5A3.5 3.5 0 0 1 17.5 18z"/></svg></span><div class="st-txt"><b>Enviar a Coupa</b><code>ZMM_CREATE_COUPA_OC</code><span class="tags"><span class="t-bad">NEW TASK</span></span></div></div>
-      <div class="step dec"><span class="ico"><svg viewBox="0 0 24 24"><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7v.5M12 17h.01"/></svg></span><div class="st-txt"><b>¿Liberada total?</b><code>estado 05</code><span class="tags"><span class="t-no">No → fin</span></span></div></div>
-      <div class="step dec"><span class="ico"><svg viewBox="0 0 24 24"><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7v.5M12 17h.01"/></svg></span><div class="st-txt"><b>¿Servicios múltiples?</b><code>ZMM_SERV_MULTI</code><span class="tags"><span class="t-no">Sí → ZMIGO_PEND_SERV</span></span></div></div>
-      <div class="step act"><span class="ico"><svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg></span><div class="st-txt"><b>Anticipo</b><code>ZFMFI_CHECK_PO</code><span class="tags"><span class="t-bad">NEW TASK</span></span></div></div>
-      <div class="step act"><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span><div class="st-txt"><b>MIGO</b><code>ZFMMM_MIGO_CREATE</code><span class="tags"><span class="t-bad">WAIT 5 s</span></span></div></div>
+    <div class="lane off">
+      <div class="lane-h"><b>Post-liberación</b><span class="off-badge">Fuera de alcance por ahora</span></div>
+      <div class="step act"><span class="ico"><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-8 6 6 0 0 1 11.5 1.5A3.5 3.5 0 0 1 17.5 18z"/></svg></span><div class="st-txt"><b>Enviar a Coupa</b><code>ZMM_CREATE_COUPA_OC</code></div></div>
+      <div class="step dec"><span class="ico"><svg viewBox="0 0 24 24"><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7v.5M12 17h.01"/></svg></span><div class="st-txt"><b>¿SolPed en ZMM_SERV_MULTI?</b><code>Sí → ZMIGO_PEND_SERV</code></div></div>
+      <div class="step act"><span class="ico"><svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg></span><div class="st-txt"><b>Anticipo</b><code>ZFMFI_CHECK_PO</code></div></div>
+      <div class="step act"><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span><div class="st-txt"><b>MIGO</b><code>ZFMMM_MIGO_CREATE</code></div></div>
     </div>
-
   </div>
 </section>
 
 <div class="grid">
 
-  <!-- OPCIÓN 1 -->
-  <section class="opt o1">
+  <!-- A -->
+  <section class="opt oa">
     <div class="opt-head">
-      <span class="tag">OPCIÓN 1</span>
-      <h2>Application Job en S/4 (ABAP Cloud)</h2>
-      <p>Un job ejecutado por el usuario genérico busca las tareas pendientes, evalúa la regla de monto y aprueba. En la misma corrida ejecuta la post-liberación.</p>
+      <div class="head-row"><span class="tag">OPCIÓN A</span><span class="state blocked">No implementable hoy</span></div>
+      <h2>Condiciones estándar del Flexible Workflow</h2>
+      <p>Se configuran pasos con las condiciones que SAP ya entrega. Si ningún paso aplica, el workflow libera la OC solo. Sin código y sin BAdIs.</p>
     </div>
-
     <div class="sec">
       <h3>Solución</h3>
       <ol class="flow">
-        <li><div><span class="where">S/4 · Flexible Workflow (sin cambios)</span><span class="what">La OC se crea y entra a aprobación según la configuración actual.</span></div></li>
-        <li><div><span class="where">S/4 · Application Job, cada 1–5 min</span><span class="what"><b>Fase 1:</b> busca tareas TS00800531 abiertas y calcula el total en USD con la clase de reglas.</span></div></li>
-        <li><div><span class="where">S/4 · Wrapper Tier 2</span><span class="what">Si cumple el rango del nivel, aprueba la tarea y registra la OC en la tabla de control.</span></div></li>
-        <li><div><span class="where">S/4 · Application Job, misma corrida o siguiente</span><span class="what"><b>Fase 2:</b> las OC aprobadas por el bot que ya están liberadas (estado 05) pasan a servicios múltiples, anticipo, Coupa y MIGO con la clase existente.</span></div></li>
+        <li><div><span class="where">S/4 · Manage Workflows for Purchase Orders</span><span class="what">Pasos de aprobación con condición estándar de monto neto, por moneda (USD, COP…).</span></div></li>
+        <li><div><span class="where">S/4 · Flexible Workflow estándar</span><span class="what">Si el monto está bajo el umbral, ningún paso aplica y la OC se libera al guardarse.</span></div></li>
+        <li><div><span class="where">S/4 · Revisión periódica</span><span class="what">Ajustar los umbrales en moneda local cuando la tasa de cambio se mueva.</span></div></li>
       </ol>
     </div>
+    <div class="sec">
+      <h3>Objetos a crear</h3>
+      <p class="empty">Ninguno. Solo configuración en la app estándar, a cargo del administrador del workflow.</p>
+    </div>
+    <div class="sec meter">
+      <h3>Clean core</h3>
+      <div class="big">100 %<small>estándar · sin código</small></div>
+      <div class="bar" aria-label="100% estándar"><span class="bstd" style="width:100%"></span></div>
+      <div class="legend"><span><i style="background:var(--good)"></i>Configuración estándar</span></div>
+      <p class="note">Por qué: usa solo lo que SAP entrega. No hay objetos Z, wrappers ni usuario técnico aprobando.</p>
+    </div>
+    <div class="sec">
+      <h3>Pros y contras</h3>
+      <div class="pc">
+        <div class="pro"><h3>Pros</h3><ul>
+          <li>Cero desarrollo</li>
+          <li>Liberación inmediata</li>
+          <li>Sin aprobador técnico: la OC "no requirió aprobación"</li>
+          <li>Upgrade-safe por definición</li>
+        </ul></div>
+        <div class="con"><h3>Contras</h3><ul>
+          <li>Bloqueada: la configuración está congelada por pruebas integrales, sin fecha</li>
+          <li>Monto en moneda del documento, no en USD</li>
+          <li>Umbrales por moneda que se desfasan con la tasa</li>
+          <li>Depende del administrador del workflow</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="sec via">
+      <h3>Viabilidad</h3>
+      <span class="pill bloq">Alta técnicamente · bloqueada hoy</span>
+      <ul>
+        <li>Disponible cuando terminen las pruebas integrales del workflow</li>
+        <li>El negocio debe aceptar umbrales por moneda en lugar de USD</li>
+      </ul>
+    </div>
+  </section>
 
+  <!-- B -->
+  <section class="opt ob">
+    <div class="opt-head">
+      <div class="head-row"><span class="tag">OPCIÓN B</span><span class="state reco">Recomendada hoy</span></div>
+      <h2>Application Job aprobador en S/4</h2>
+      <p>Un job con el usuario genérico busca las tareas pendientes, evalúa la regla en USD y aprueba. Es el reemplazo directo del job de ECC.</p>
+    </div>
+    <div class="sec">
+      <h3>Solución</h3>
+      <ol class="flow">
+        <li><div><span class="where">S/4 · Flexible Workflow (sin cambios)</span><span class="what">La OC entra a aprobación según la configuración actual.</span></div></li>
+        <li><div><span class="where">S/4 · Application Job, cada 1–5 min</span><span class="what">Busca tareas TS00800531 abiertas y calcula el total en USD con la clase de reglas.</span></div></li>
+        <li><div><span class="where">S/4 · Wrapper Tier 2</span><span class="what">Si cumple el rango del nivel, aprueba la tarea. Si no, queda para aprobación manual.</span></div></li>
+        <li><div><span class="where">S/4 · Application Log</span><span class="what">Registra OC, nivel, monto USD y rango aplicado.</span></div></li>
+      </ol>
+    </div>
     <div class="sec">
       <h3>Objetos a crear</h3>
       <div class="tbl-wrap"><table>
         <thead><tr><th>Objeto</th><th>Tipo</th><th>Tier</th></tr></thead>
         <tbody>
           <tr><td class="obj">ZMM_PO_APPR_RULE</td><td>Tabla BD + mantenimiento de configuración</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZMM_PO_APPR_CTRL</td><td>Tabla BD (control y auditoría)</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZCL_MM_PO_APPROVAL_RULES</td><td>Clase ABAP (regla de monto USD)</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZCL_MM_PO_APPR_JOB</td><td>Clase ABAP de Application Job + catálogo + plantilla</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">Clase MIGO existente</td><td>Reutilizada, ya en ABAP Cloud</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZCL_MM_WF_DECISION_API</td><td>Clase wrapper (aprobar tarea)</td><td><span class="tier t2">T2 · C1</span></td></tr>
-          <tr><td class="obj">Wrapper anticipo</td><td>Clase wrapper, solo si <code>ZFMFI_CHECK_PO</code> es clásica</td><td><span class="tier t2">T2 · C1</span></td></tr>
+          <tr><td class="obj">ZCL_MM_PO_APPROVAL_RULES</td><td>Clase ABAP (total USD y rango)</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">ZCL_MM_PO_APPR_JOB</td><td>Clase de Application Job + catálogo + plantilla</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">ZCL_MM_WF_DECISION_API</td><td>Clase wrapper (buscar tareas y aprobar)</td><td><span class="tier t2">T2 · C1</span></td></tr>
         </tbody>
       </table></div>
     </div>
-
     <div class="sec meter">
       <h3>Clean core</h3>
-      <div class="big">≈ 85 %<small>Tier 1 · 0 % Tier 3</small></div>
-      <div class="bar" aria-label="85% Tier 1, 15% Tier 2"><span class="b1" style="width:85%"></span><span class="b2" style="width:15%"></span></div>
+      <div class="big">≈ 80 %<small>Tier 1 · 0 % Tier 3</small></div>
+      <div class="bar" aria-label="80% Tier 1, 20% Tier 2"><span class="b1" style="width:80%"></span><span class="b2" style="width:20%"></span></div>
       <div class="legend"><span><i style="background:var(--t1)"></i>Tier 1 · ABAP Cloud</span><span><i style="background:var(--t2)"></i>Tier 2 · wrapper C1</span></div>
-      <p class="note">Por qué: toda la lógica de negocio está en ABAP Cloud con APIs released. Solo la decisión de la tarea (y el anticipo, si sigue siendo clásico) necesita wrapper Tier 2, porque no hay API released para eso. Es el patrón aceptado por SAP para Private Cloud. Estimación por número de objetos de código.</p>
+      <p class="note">Por qué: no hay API released para decidir tareas de workflow, así que la aprobación necesita un wrapper Tier 2. El resto es ABAP Cloud.</p>
     </div>
-
     <div class="sec">
       <h3>Pros y contras</h3>
       <div class="pc">
         <div class="pro"><h3>Pros</h3><ul>
-          <li>Replica exactamente el comportamiento de ECC</li>
-          <li>Regla determinística: fácil de auditar</li>
-          <li>Sin licencias ni costo de consumo</li>
-          <li>Todo en S/4: pocas dependencias y puntos de falla</li>
-          <li>Mismo usuario genérico para aprobar y crear la MIGO</li>
+          <li>No toca el Flexible Workflow</li>
+          <li>Regla exacta en USD, como en ECC</li>
+          <li>Sin licencias ni costo adicional</li>
+          <li>Todo en S/4, pocos puntos de falla</li>
+          <li>Disponible ya</li>
         </ul></div>
         <div class="con"><h3>Contras</h3><ul>
-          <li>Requiere 1–2 wrappers Tier 2</li>
+          <li>Requiere un wrapper Tier 2</li>
           <li>Usuario técnico con perfil de administrador de workflow</li>
           <li>Latencia ligada a la frecuencia del job</li>
-          <li>Sin valor agregado de IA para los casos de excepción</li>
+          <li>Se retira si después se activa la opción A</li>
         </ul></div>
       </div>
     </div>
-
     <div class="sec via">
       <h3>Viabilidad</h3>
       <span class="pill alta">Alta</span>
       <ul>
-        <li>Depende de la prueba A/B de la decisión sobre TS00800531</li>
-        <li>Validar con Basis la frecuencia mínima del job</li>
+        <li>Depende de la prueba de concepto de la decisión sobre TS00800531</li>
+        <li>Validar con Basis la frecuencia mínima del job y las autorizaciones del usuario genérico</li>
       </ul>
     </div>
   </section>
 
-  <!-- OPCIÓN 2 -->
-  <section class="opt o2">
+  <!-- C -->
+  <section class="opt oc">
     <div class="opt-head">
-      <span class="tag">OPCIÓN 2</span>
-      <h2>Agente Joule Studio vía SAP Build Process Automation</h2>
-      <p>Un proceso programado en BTP invoca un agente que busca las aprobaciones pendientes, consulta la regla en S/4 y aprueba. La MIGO sigue en S/4.</p>
+      <div class="head-row"><span class="tag">OPCIÓN C</span></div>
+      <h2>SAP Build Process Automation con tabla de decisión</h2>
+      <p>Un proceso programado en BTP lee las tareas pendientes, evalúa una tabla de decisión que mantiene el negocio y aprueba. Sin IA.</p>
     </div>
-
     <div class="sec">
       <h3>Solución</h3>
       <ol class="flow">
-        <li><div><span class="where">S/4 · Flexible Workflow (sin cambios)</span><span class="what">La OC se crea y entra a aprobación según la configuración actual.</span></div></li>
-        <li><div><span class="where">BTP · Process Automation, cada 5–15 min</span><span class="what">Un disparador programado inicia el proceso y llama al agente.</span></div></li>
-        <li><div><span class="where">BTP · Agente Joule + skills</span><span class="what">Lee las tareas pendientes (<code>TASKPROCESSING</code>), llama al servicio OData de reglas en S/4 y aprueba con <code>Decision</code> usando el usuario genérico.</span></div></li>
-        <li><div><span class="where">S/4 · Application Job, cada 1–5 min</span><span class="what">La post-liberación (servicios múltiples, anticipo, Coupa y MIGO) sigue en S/4.</span></div></li>
+        <li><div><span class="where">S/4 · Flexible Workflow (sin cambios)</span><span class="what">La OC entra a aprobación según la configuración actual.</span></div></li>
+        <li><div><span class="where">BTP · Proceso programado, cada 5–15 min</span><span class="what">Lee las tareas pendientes con <code>TASKPROCESSING</code> y el total USD con un servicio de S/4.</span></div></li>
+        <li><div><span class="where">BTP · Tabla de decisión de Build</span><span class="what">Evalúa nivel y monto contra los rangos que define el negocio.</span></div></li>
+        <li><div><span class="where">BTP → S/4 · Destino</span><span class="what">Si cumple, aprueba con <code>Decision</code> usando el usuario técnico.</span></div></li>
       </ol>
-      <p class="note">La IA no decide montos ni rangos: la evaluación la hace siempre la clase de reglas en S/4. El agente solo orquesta.</p>
     </div>
-
     <div class="sec">
       <h3>Objetos a crear</h3>
       <div class="tbl-wrap"><table>
         <thead><tr><th>Objeto</th><th>Tipo</th><th>Tier</th></tr></thead>
         <tbody>
-          <tr><td class="obj">ZMM_PO_APPR_RULE</td><td>Tabla BD + mantenimiento de configuración</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZMM_PO_APPR_CTRL</td><td>Tabla BD (control y auditoría)</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZCL_MM_PO_APPROVAL_RULES</td><td>Clase ABAP (regla de monto USD)</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZR_MM_PO_APPR_EVAL</td><td>CDS + definición y binding de servicio OData</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZCL_MM_PO_POSTREL_JOB</td><td>Clase ABAP de Application Job + catálogo + plantilla</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">Clase MIGO existente</td><td>Reutilizada, ya en ABAP Cloud</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">TASKPROCESSING</td><td>Servicio estándar de My Inbox (validar estado)</td><td><span class="tier std">Estándar</span></td></tr>
-          <tr><td class="obj">Wrapper anticipo</td><td>Clase wrapper, solo si <code>ZFMFI_CHECK_PO</code> es clásica</td><td><span class="tier t2">T2 · C1</span></td></tr>
-          <tr><td class="obj">Agente + 3 skills</td><td>Joule Studio (buscar, evaluar, aprobar)</td><td><span class="tier sbs">BTP</span></td></tr>
+          <tr><td class="obj">ZR_MM_PO_TOTAL_USD</td><td>CDS + servicio OData (total de la OC en USD)</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">TASKPROCESSING</td><td>Servicio estándar de My Inbox</td><td><span class="tier std">Estándar</span></td></tr>
           <tr><td class="obj">Proceso programado</td><td>SAP Build Process Automation</td><td><span class="tier sbs">BTP</span></td></tr>
+          <tr><td class="obj">Tabla de decisión</td><td>Regla de negocio de Build</td><td><span class="tier sbs">BTP</span></td></tr>
           <tr><td class="obj">Destino + Actions</td><td>BTP Destination + SAP Build Actions</td><td><span class="tier sbs">BTP</span></td></tr>
         </tbody>
       </table></div>
     </div>
-
     <div class="sec meter">
       <h3>Clean core</h3>
-      <div class="big">≈ 90 %<small>Tier 1 + side-by-side · 0 % Tier 3</small></div>
-      <div class="bar" aria-label="55% Tier 1, 35% side-by-side, 10% Tier 2"><span class="b1" style="width:55%"></span><span class="bs" style="width:35%"></span><span class="b2" style="width:10%"></span></div>
-      <div class="legend"><span><i style="background:var(--t1)"></i>Tier 1 · ABAP Cloud</span><span><i style="background:var(--warn)"></i>Side-by-side · BTP</span><span><i style="background:var(--t2)"></i>Tier 2 · wrapper C1</span></div>
-      <p class="note">Por qué: la aprobación sale del núcleo hacia BTP y usa el servicio estándar de My Inbox, así que no hace falta wrapper para la decisión. Solo el anticipo podría quedar en Tier 2. Un porcentaje más alto no significa una solución más simple: hay más piezas y más plataformas.</p>
+      <div class="big">≈ 100 %<small>Tier 1 + side-by-side</small></div>
+      <div class="bar" aria-label="20% Tier 1, 80% side-by-side"><span class="b1" style="width:20%"></span><span class="bs" style="width:80%"></span></div>
+      <div class="legend"><span><i style="background:var(--t1)"></i>Tier 1 · ABAP Cloud</span><span><i style="background:var(--warn)"></i>Side-by-side · BTP</span></div>
+      <p class="note">Por qué: la aprobación sale del núcleo hacia BTP y usa servicios estándar. En S/4 solo queda un servicio de lectura en ABAP Cloud.</p>
     </div>
-
     <div class="sec">
       <h3>Pros y contras</h3>
       <div class="pc">
         <div class="pro"><h3>Pros</h3><ul>
-          <li>Mayor extensión side-by-side y menos código en el núcleo</li>
-          <li>Base lista para sumar razonamiento con IA (excepciones, proveedor, presupuesto)</li>
-          <li>Posiciona a Joule en el cliente</li>
-          <li>Reutiliza la misma clase de reglas</li>
+          <li>No toca el Flexible Workflow</li>
+          <li>El negocio mantiene los rangos sin programar</li>
+          <li>Casi sin código en el núcleo</li>
+          <li>Visibilidad y monitoreo en Build</li>
         </ul></div>
         <div class="con"><h3>Contras</h3><ul>
-          <li>Para una regla determinística, SAP sugiere skills o automatización, no agentes</li>
-          <li>Consumo de AI Units aunque no haya OC pendientes</li>
-          <li>Requiere licencias: Joule, Build y AI Units</li>
-          <li>Más dependencias: BTP, Process Automation, destino y Joule</li>
-          <li>Más difícil de justificar ante auditoría si el agente "decide"</li>
-          <li>La MIGO igual necesita el job en S/4</li>
+          <li>Requiere licencia de Build Process Automation</li>
+          <li>Más piezas: BTP, destino, usuario técnico</li>
+          <li>Mayor latencia que el job</li>
+          <li>Usuario técnico aprobando, igual que B</li>
         </ul></div>
       </div>
     </div>
-
     <div class="sec via">
       <h3>Viabilidad</h3>
       <span class="pill media">Media</span>
       <ul>
-        <li>Disparo desatendido: hoy pasa por Process Automation, y SAP lo tiene en evolución</li>
+        <li>Confirmar licencia y subaccount de Build Process Automation</li>
+        <li>La prueba de concepto de <code>TASKPROCESSING</code> con usuario técnico aplica igual</li>
         <li>Validar la frecuencia mínima del disparador programado</li>
-        <li>Costo estimado (agente Standard, 0,01 AI Units/paso): cada 15 min ≈ <b>58 AI Units/mes</b> solo en revisar; cada 1 min ≈ <b>860</b>; más ≈ 0,04 por OC aprobada</li>
       </ul>
     </div>
   </section>
 
-  <!-- OPCIÓN 3 -->
-  <section class="opt o3">
+  <!-- D -->
+  <section class="opt od">
     <div class="opt-head">
-      <span class="tag">OPCIÓN 3</span>
-      <h2>BAdIs de Flexible Workflow + job de MIGO</h2>
-      <p>El otro equipo implementa la condición de monto en los BAdIs del workflow. Si ningún paso aplica, el workflow libera la OC solo. Un job tuyo crea la MIGO.</p>
+      <div class="head-row"><span class="tag">OPCIÓN D</span></div>
+      <h2>Agente Joule Studio vía Build Process Automation</h2>
+      <p>Igual que C, pero un agente orquesta las herramientas. La regla se evalúa siempre en S/4, nunca en la IA.</p>
     </div>
-
     <div class="sec">
       <h3>Solución</h3>
       <ol class="flow">
-        <li><div><span class="where">S/4 · BAdI de condición (otro equipo)</span><span class="what">La condición custom "Monto USD fuera del rango automático del nivel N" llama a tu clase de reglas.</span></div></li>
-        <li><div><span class="where">S/4 · Flexible Workflow estándar</span><span class="what">Si ningún paso aplica, la OC se libera automáticamente, sin aprobador técnico.</span></div></li>
-        <li><div><span class="where">S/4 · Application Job, cada 1–5 min</span><span class="what">Toma las OC liberadas y no procesadas que cumplen el criterio de MIGO automática.</span></div></li>
-        <li><div><span class="where">S/4 · Post-liberación</span><span class="what">Servicios múltiples, anticipo, Coupa y MIGO con la clase existente.</span></div></li>
+        <li><div><span class="where">S/4 · Flexible Workflow (sin cambios)</span><span class="what">La OC entra a aprobación según la configuración actual.</span></div></li>
+        <li><div><span class="where">BTP · Proceso programado, cada 5–15 min</span><span class="what">Un disparador programado invoca al agente.</span></div></li>
+        <li><div><span class="where">BTP · Agente Joule + skills</span><span class="what">Busca tareas pendientes, consulta la regla en S/4 y aprueba con <code>Decision</code>.</span></div></li>
       </ol>
-      <p class="note">La regla de monto sigue siendo tuya: el BAdI solo llama a <code>ZCL_MM_PO_APPROVAL_RULES</code>.</p>
     </div>
-
     <div class="sec">
       <h3>Objetos a crear</h3>
       <div class="tbl-wrap"><table>
         <thead><tr><th>Objeto</th><th>Tipo</th><th>Tier</th></tr></thead>
         <tbody>
           <tr><td class="obj">ZMM_PO_APPR_RULE</td><td>Tabla BD + mantenimiento de configuración</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZMM_PO_APPR_CTRL</td><td>Tabla BD (control y auditoría)</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZCL_MM_PO_APPROVAL_RULES</td><td>Clase ABAP (regla de monto USD, usada por el BAdI)</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">Implementación BAdI</td><td><code>SWF_WORKFLOW_CONDITION_DEF/EVAL</code> (otro equipo)</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZCL_MM_PO_POSTREL_JOB</td><td>Clase ABAP de Application Job + catálogo + plantilla</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">Clase MIGO existente</td><td>Reutilizada, ya en ABAP Cloud</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">Wrapper anticipo</td><td>Clase wrapper, solo si <code>ZFMFI_CHECK_PO</code> es clásica</td><td><span class="tier t2">T2 · C1</span></td></tr>
+          <tr><td class="obj">ZCL_MM_PO_APPROVAL_RULES</td><td>Clase ABAP (total USD y rango)</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">ZR_MM_PO_APPR_EVAL</td><td>CDS + servicio OData de evaluación</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">TASKPROCESSING</td><td>Servicio estándar de My Inbox</td><td><span class="tier std">Estándar</span></td></tr>
+          <tr><td class="obj">Agente + 3 skills</td><td>Joule Studio (buscar, evaluar, aprobar)</td><td><span class="tier sbs">BTP</span></td></tr>
+          <tr><td class="obj">Proceso + destino</td><td>Build Process Automation + Destination</td><td><span class="tier sbs">BTP</span></td></tr>
         </tbody>
       </table></div>
     </div>
-
     <div class="sec meter">
       <h3>Clean core</h3>
-      <div class="big">≈ 95 %<small>Tier 1 · 0 % Tier 3</small></div>
-      <div class="bar" aria-label="95% Tier 1, 5% Tier 2"><span class="b1" style="width:95%"></span><span class="b2" style="width:5%"></span></div>
-      <div class="legend"><span><i style="background:var(--t1)"></i>Tier 1 · ABAP Cloud</span><span><i style="background:var(--t2)"></i>Tier 2 · wrapper C1</span></div>
-      <p class="note">Por qué: la liberación usa los BAdIs released del framework estándar, así que no hace falta wrapper de decisión ni usuario administrador aprobando. Solo el anticipo podría quedar en Tier 2.</p>
+      <div class="big">≈ 100 %<small>Tier 1 + side-by-side</small></div>
+      <div class="bar" aria-label="50% Tier 1, 50% side-by-side"><span class="b1" style="width:50%"></span><span class="bs" style="width:50%"></span></div>
+      <div class="legend"><span><i style="background:var(--t1)"></i>Tier 1 · ABAP Cloud</span><span><i style="background:var(--warn)"></i>Side-by-side · BTP</span></div>
+      <p class="note">Por qué: no necesita wrappers. Un porcentaje alto no significa una solución simple: tiene más plataformas que cualquier otra opción.</p>
     </div>
-
     <div class="sec">
       <h3>Pros y contras</h3>
       <div class="pc">
         <div class="pro"><h3>Pros</h3><ul>
-          <li>La opción más clean core</li>
-          <li>Liberación estándar: sin aprobador técnico</li>
-          <li>Auditoría natural: la OC "no requirió aprobación"</li>
-          <li>Liberación inmediata, sin esperar un job</li>
-          <li>Menos objetos y sin costo adicional</li>
+          <li>No toca el Flexible Workflow</li>
+          <li>Base para sumar razonamiento con IA en excepciones</li>
+          <li>Posiciona a Joule en el cliente</li>
         </ul></div>
         <div class="con"><h3>Contras</h3><ul>
-          <li>Depende del cronograma del otro equipo (meses)</li>
-          <li>No controlas la implementación del BAdI</li>
-          <li>La lógica de rangos se invierte frente a ECC: hay que remapearla con el negocio</li>
-          <li>El job debe distinguir qué OC llevan MIGO automática</li>
-          <li>Si la OC cambia, el workflow se reinicia y la condición se vuelve a evaluar</li>
+          <li>Para una regla fija, la IA no aporta sobre C</li>
+          <li>Consume AI Units aunque no haya OC pendientes</li>
+          <li>Licencias de Build, Joule y AI Units</li>
+          <li>La más compleja de operar y auditar</li>
         </ul></div>
       </div>
     </div>
-
     <div class="sec via">
       <h3>Viabilidad</h3>
-      <span class="pill plazo">Alta · a mediano plazo</span>
+      <span class="pill baja">Media–baja</span>
       <ul>
-        <li>Técnicamente es el camino estándar de SAP</li>
-        <li>Disponible solo cuando el otro equipo libere los BAdIs</li>
-        <li>Definir el criterio de MIGO: misma regla de monto o sin pasos de aprobación manual</li>
+        <li>Costo estimado (agente Standard, 0,01 AI Units/paso): cada 15 min ≈ <b>58 AI Units/mes</b> solo en revisar; cada 5 min ≈ <b>173</b>; más ≈ 0,04 por OC aprobada</li>
+        <li>El disparo desatendido pasa por Build Process Automation</li>
       </ul>
     </div>
   </section>
@@ -426,47 +449,44 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
 <section class="compare">
   <h2>Comparativo rápido</h2>
   <div class="tbl-wrap"><table>
-    <thead><tr><th>Criterio</th><th>Opción 1 · Job S/4</th><th>Opción 2 · Agente Joule</th><th>Opción 3 · BAdI + job MIGO</th></tr></thead>
+    <thead><tr><th>Criterio</th><th>A · Config estándar</th><th>B · Job S/4</th><th>C · Build + tabla</th><th>D · Agente Joule</th></tr></thead>
     <tbody>
-      <tr><td>Clean core</td><td>≈ 85 % (T1 + T2)</td><td>≈ 90 % (T1 + BTP)</td><td class="win">≈ 95 % (T1)</td></tr>
-      <tr><td>Quién libera</td><td>Usuario genérico admin.</td><td>Agente con usuario genérico</td><td class="win">Workflow estándar</td></tr>
-      <tr><td>Equivalencia con ECC</td><td class="win">Total</td><td>Total, con más piezas</td><td>Funcional, con rangos remapeados</td></tr>
-      <tr><td>Latencia de liberación</td><td>1–5 min</td><td>5–15 min</td><td class="win">Inmediata</td></tr>
-      <tr><td>Costo incremental</td><td class="win">Ninguno</td><td>AI Units + licencias</td><td class="win">Ninguno</td></tr>
-      <tr><td>Auditoría</td><td>Aprueba un usuario técnico</td><td>Regla en S/4, orquestada por IA</td><td class="win">Comportamiento estándar</td></tr>
-      <tr><td>Dependencias</td><td class="win">Ninguna</td><td>BTP, Joule y licencias</td><td>Equipo de BAdIs</td></tr>
-      <tr><td>Disponibilidad</td><td class="win">Inmediata</td><td>Media</td><td>En meses</td></tr>
-      <tr><td>Esfuerzo propio</td><td>Bajo–medio</td><td>Medio–alto</td><td class="win">Bajo</td></tr>
-      <tr><td>Valor de innovación</td><td>Bajo</td><td class="win">Alto</td><td>Bajo</td></tr>
-      <tr><td>Viabilidad</td><td class="win">Alta</td><td>Media</td><td>Alta, a mediano plazo</td></tr>
+      <tr><td>Disponible hoy</td><td>No (configuración congelada)</td><td class="win">Sí</td><td>Sí, con licencia</td><td>Sí, con licencias</td></tr>
+      <tr><td>Toca el workflow</td><td>Configuración</td><td class="win">No</td><td class="win">No</td><td class="win">No</td></tr>
+      <tr><td>Código propio</td><td class="win">Ninguno</td><td>4 objetos</td><td>1 servicio + BTP</td><td>3 objetos + BTP</td></tr>
+      <tr><td>Clean core</td><td class="win">100 % estándar</td><td>≈ 80 %</td><td>≈ 100 %</td><td>≈ 100 %</td></tr>
+      <tr><td>Regla en USD</td><td>No, por moneda</td><td class="win">Sí</td><td class="win">Sí</td><td class="win">Sí</td></tr>
+      <tr><td>Quién libera</td><td class="win">El workflow</td><td>Usuario genérico admin.</td><td>Usuario técnico vía BTP</td><td>Usuario técnico vía BTP</td></tr>
+      <tr><td>Quién mantiene la regla</td><td>Admin. de workflow</td><td>Negocio (app de configuración)</td><td class="win">Negocio (tabla de Build)</td><td>Negocio / desarrollo</td></tr>
+      <tr><td>Latencia</td><td class="win">Inmediata</td><td>1–5 min</td><td>5–15 min</td><td>5–15 min</td></tr>
+      <tr><td>Costo adicional</td><td class="win">Ninguno</td><td class="win">Ninguno</td><td>Licencia Build</td><td>Licencias + AI Units</td></tr>
+      <tr><td>Viabilidad</td><td>Alta, bloqueada</td><td class="win">Alta</td><td>Media</td><td>Media–baja</td></tr>
     </tbody>
   </table></div>
 </section>
 
 <section class="reco">
   <h2>Recomendación</h2>
-  <p><b>Usar la Opción 1 como puente hacia la Opción 3.</b> Se sale a productivo ya, sin esperar los BAdIs, y se termina en la opción más limpia. Las tres opciones comparten la tabla de reglas, la clase de reglas, la tabla de control y la clase MIGO, así que ningún cambio de fase implica rehacer lo construido.</p>
+  <p><b>Salir con la opción B</b> y dejar la A como destino cuando se libere la configuración del workflow. B es la única que hoy no toca el workflow, mantiene la regla exacta en USD y no tiene costo adicional. La tabla y la clase de reglas sirven además como referencia para definir los umbrales de la A.</p>
   <div class="phases">
-    <div class="phase"><span class="when">FASE 1 · go-live</span><b>Opción 1: job aprueba + MIGO</b><span>Reemplazo exacto del job de ECC, sin costo adicional ni dependencia del otro equipo.</span></div>
-    <div class="phase"><span class="when">FASE 2 · cuando estén los BAdIs</span><b>Opción 3: el workflow libera</b><span>Se desactiva la fase de aprobación del job y se retira el wrapper de decisión. El job de MIGO sigue igual.</span></div>
-    <div class="phase"><span class="when">FASE 3 · opcional</span><b>Agente Joule supervisor</b><span>Reporta las OC liberadas, los errores de MIGO y las que quedaron fuera de rango.</span></div>
+    <div class="phase"><span class="when">AHORA</span><b>Opción B: job aprobador</b><span>Reemplazo directo del job de ECC, tras la prueba de concepto.</span></div>
+    <div class="phase"><span class="when">AL TERMINAR PRUEBAS INTEGRALES</span><b>Evaluar migrar a la opción A</b><span>Si el negocio acepta umbrales por moneda, se retiran el job y el wrapper.</span></div>
+    <div class="phase"><span class="when">ALTERNATIVA</span><b>Opción C</b><span>Si el negocio quiere mantener los rangos en BTP y ya tiene licencia de Build.</span></div>
   </div>
 </section>
 
 <section class="pend">
   <h2>Validaciones pendientes</h2>
   <ul>
-    <li>Prueba A/B de aprobación de TS00800531: <code>TASKPROCESSING</code> vs. <code>SAP_WAPI_DECISION_COMPLETE</code></li>
-    <li>Mapeo de los rangos de <code>ZMM_COD_PED</code> (por código de liberación) a niveles del Flexible Workflow, con el negocio</li>
-    <li>Firma de la clase MIGO y si hace <code>COMMIT ENTITIES</code> internamente</li>
-    <li>Estado de <code>ZFMFI_CHECK_PO</code> (anticipo) y de la integración con Coupa (<code>ZMM_CREATE_COUPA_OC</code>)</li>
-    <li>Tipo de OC: materiales o servicios (lean services usa hoja de entrada, no MIGO)</li>
-    <li>Frecuencia mínima del Application Job y autorizaciones del usuario genérico</li>
-    <li>Opción 3: fecha estimada de los BAdIs del otro equipo y acuerdo para que llamen a <code>ZCL_MM_PO_APPROVAL_RULES</code></li>
-    <li>Opción 3: criterio para decidir qué OC liberadas llevan MIGO automática</li>
+    <li>Prueba de concepto de la decisión sobre TS00800531: <code>TASKPROCESSING</code> y <code>SAP_WAPI_DECISION_COMPLETE</code> <span class="for">B · C · D</span></li>
+    <li>Mapeo de los rangos de <code>ZMM_COD_PED</code> (por código de liberación) a niveles del Flexible Workflow <span class="for">todas</span></li>
+    <li>Frecuencia mínima del Application Job y autorizaciones del usuario genérico <span class="for">B</span></li>
+    <li>Licencia y subaccount de SAP Build Process Automation <span class="for">C · D</span></li>
+    <li>Fecha estimada de fin de las pruebas integrales del workflow <span class="for">A</span></li>
+    <li>¿El negocio acepta umbrales por moneda en lugar de un umbral en USD? <span class="for">A</span></li>
   </ul>
 </section>
 
-<footer>Octubre 2026. Porcentajes de clean core estimados por número de objetos; los consumos de AI Units usan la tarifa publicada por SAP para agentes Standard y se deben confirmar con el AI Unit Estimator.</footer>
+<footer>Octubre 2026. Porcentajes de clean core estimados por número de objetos. Los consumos de AI Units usan la tarifa publicada por SAP para agentes Standard y se deben confirmar con el AI Unit Estimator.</footer>
 </div>
 </body></html>

@@ -2,7 +2,7 @@
 
 Migración a **S/4HANA Cloud Private Edition** (ABAP Cloud / Clean Core) del job de ECC
 `ZMM_APR_PED_BOT`, que libera automáticamente las órdenes de compra pendientes según
-rangos de monto y luego ejecuta anticipo, integración con Coupa y MIGO.
+rangos de monto.
 
 - Comparativo visual de opciones: [`docs/index.html`](docs/index.html)
 - Diseño de la solución: [`docs/diseno-solucion.md`](docs/diseno-solucion.md)
@@ -12,44 +12,40 @@ rangos de monto y luego ejecuta anticipo, integración con Coupa y MIGO.
 | Tema | ECC (actual) | S/4HANA Private (objetivo) |
 |---|---|---|
 | Liberación | Estrategia clásica (`T16FS`) + `BAPI_PO_RELEASE` | Flexible Workflow (tarea `TS00800531`) |
-| Regla | Rangos de monto en USD por código de liberación (`ZMM_COD_PED`) | Rangos de monto en USD por nivel de aprobación |
-| Ejecutor | Usuario genérico creador del job | Usuario genérico con perfil de administrador de workflow |
-| Post-liberación | `ZCL_MM_GEN->m_eval_migo`, `ZMM_CREATE_COUPA_OC` | Clase MIGO existente (ABAP Cloud) + anticipo + Coupa |
+| Regla | Rangos de monto en USD por código de liberación (`ZMM_COD_PED`) | Rangos de monto por nivel de aprobación |
+| Ejecutor | Usuario genérico creador del job | Según la opción elegida |
 
-**Restricción:** no se modifica la configuración ni los BAdIs del Flexible Workflow
-(los gestiona otro equipo).
+**Alcance:** solo la aprobación automática. Los procesos post-liberación (Coupa, anticipo,
+MIGO) quedan fuera de alcance por ahora.
 
-## Opciones evaluadas
+**Restricciones:**
+- No se usan BAdIs del Flexible Workflow.
+- La configuración del Flexible Workflow está congelada por pruebas integrales, sin fecha de fin.
 
-| Criterio | Opción 1 · Job en S/4 | Opción 2 · Agente Joule | Opción 3 · BAdI + job MIGO |
-|---|---|---|---|
-| Quién libera | Usuario genérico admin. | Agente con usuario genérico | Workflow estándar |
-| Clean core | ≈ 85 % (T1 + T2) | ≈ 90 % (T1 + BTP) | ≈ 95 % (T1) |
-| Latencia de liberación | 1–5 min | 5–15 min | Inmediata |
-| Costo incremental | Ninguno | AI Units + licencias | Ninguno |
-| Dependencias | Ninguna | BTP, Joule, licencias | Equipo de BAdIs (meses) |
-| Viabilidad | Alta | Media | Alta, a mediano plazo |
+## Opciones evaluadas (sin BAdIs)
 
-**Recomendación:** usar la Opción 1 como puente hacia la Opción 3.
+| Criterio | A · Config estándar WF | B · Job S/4 | C · Build + tabla de decisión | D · Agente Joule |
+|---|---|---|---|---|
+| Disponible hoy | No (config congelada) | Sí | Sí, con licencia | Sí, con licencias |
+| Toca el workflow | Configuración | No | No | No |
+| Clean core | 100 % estándar | ≈ 80 % | ≈ 100 % | ≈ 100 % |
+| Regla en USD | No, por moneda | Sí | Sí | Sí |
+| Latencia | Inmediata | 1–5 min | 5–15 min | 5–15 min |
+| Costo adicional | Ninguno | Ninguno | Licencia Build | Licencias + AI Units |
+| Viabilidad | Alta, bloqueada | Alta | Media | Media–baja |
 
-1. **Go-live:** Opción 1 (el job aprueba y crea la MIGO).
-2. **Cuando el otro equipo libere los BAdIs:** Opción 3. Se desactiva la fase de aprobación
-   del job y se retira el wrapper de decisión; el job de MIGO sigue igual.
-3. **Opcional:** agente Joule como supervisor de excepciones.
-
-Las tres opciones comparten la tabla de reglas, la clase de reglas, la tabla de control y
-la clase MIGO, así que ningún cambio de fase implica rehacer lo construido.
+**Recomendación:** salir con la **opción B** y dejar la **A** como destino cuando se libere la
+configuración del workflow (si el negocio acepta umbrales por moneda). La **C** es alternativa
+si el negocio quiere mantener los rangos en BTP y ya tiene licencia de Build.
 
 ## Estado
 
-- [ ] Prueba A/B de la decisión sobre `TS00800531` (`TASKPROCESSING` vs. `SAP_WAPI_DECISION_COMPLETE`)
-- [ ] Mapeo de rangos de `ZMM_COD_PED` a niveles del Flexible Workflow (negocio)
-- [ ] Firma de la clase MIGO y comportamiento de `COMMIT ENTITIES`
-- [ ] Estado de `ZFMFI_CHECK_PO` (anticipo) y `ZMM_CREATE_COUPA_OC` (Coupa)
-- [ ] Tipo de OC: materiales o servicios (lean services)
-- [ ] Frecuencia mínima del Application Job y autorizaciones del usuario genérico
-- [ ] Opción 3: fecha de los BAdIs del otro equipo y acuerdo para que llamen a `ZCL_MM_PO_APPROVAL_RULES`
-- [ ] Opción 3: criterio para decidir qué OC liberadas llevan MIGO automática
+- [ ] Prueba de concepto de la decisión sobre `TS00800531` (`TASKPROCESSING` vs. `SAP_WAPI_DECISION_COMPLETE`) — B, C, D
+- [ ] Mapeo de rangos de `ZMM_COD_PED` a niveles del Flexible Workflow (negocio) — todas
+- [ ] Frecuencia mínima del Application Job y autorizaciones del usuario genérico — B
+- [ ] Licencia y subaccount de SAP Build Process Automation — C, D
+- [ ] Fecha estimada de fin de las pruebas integrales del workflow — A
+- [ ] ¿El negocio acepta umbrales por moneda en lugar de USD? — A
 
 ## Estructura prevista
 
