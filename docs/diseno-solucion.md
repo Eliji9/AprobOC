@@ -38,7 +38,7 @@ estándar; se agregan con los BAdIs `SWF_WORKFLOW_CONDITION_DEF` / `SWF_WORKFLOW
 2. En *Manage Workflows for Purchase Orders* se configuran los pasos por nivel con esas condiciones.
 3. Si ningún paso aplica, el workflow libera la OC automáticamente, sin aprobador técnico.
 
-- **Clean core:** ≈ 95 % (BAdIs released + configuración estándar).
+- **Clean core:** 100 % (BAdIs released Tier 1 + configuración estándar, sin Tier 2 ni 3).
 - **Bloqueo:** BAdIs a cargo de otro equipo y configuración congelada por pruebas integrales.
 
 ## 4. Opción B – Application Job aprobador (recomendada hoy)
@@ -86,7 +86,7 @@ Definiciones (15-10-2026):
 | `ZR_MM_PO_APPROVE` | Servicio RAP con acción "aprobar" (solo si no se usa sustitución) | 1 |
 | `ZCL_MM_WF_DECISION_API` | Clase wrapper (solo si no se usa sustitución) | 2 · C1 |
 
-Clean core: ≈ 100 % con sustitución o API released; ≈ 85 % si se necesita el wrapper.
+Clean core: ≈ 85 % (reutiliza el wrapper Tier 2 de la opción B a través del servicio OData).
 Ver la sección 7 para el mecanismo de aprobación.
 
 ## 6. Opción D – Agente Joule Studio vía Build Process Automation
@@ -97,7 +97,7 @@ Ver la sección 7 para el mecanismo de aprobación.
 3. La IA no decide montos ni rangos; la evaluación se hace siempre en S/4.
 
 Mismo mecanismo de aprobación y mismo condicionante que la opción C (sección 7). Si el usuario
-técnico no puede ser agente, se agrega `ZCL_MM_WF_DECISION_API` (Tier 2). Clean core ≈ 85–100 %.
+técnico no puede ser agente, se agrega `ZCL_MM_WF_DECISION_API` (Tier 2). Clean core ≈ 85 %.
 
 Costo estimado (agente Standard, 0,01 AI Units por paso): cada 15 min ≈ 58 AI Units/mes solo en
 revisar; cada 5 min ≈ 173; más ≈ 0,04 por OC aprobada. Confirmar con el AI Unit Estimator.

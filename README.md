@@ -28,7 +28,7 @@ MIGO) quedan fuera de alcance por ahora.
 |---|---|---|---|---|
 | Disponible hoy | No (config congelada) | Sí | Sí | Sí, con licencias |
 | Toca el workflow | BAdIs + configuración | No | No | No |
-| Clean core | ≈ 95 % | ≈ 80 % | ≈ 85 % | ≈ 85 % |
+| Clean core | 100 % | ≈ 80 % | ≈ 85 % | ≈ 85 % |
 | Acceso a la tarea | No aplica | Wrapper (reenvía y decide) | Servicio OData + wrapper de B | Servicio OData + wrapper de B |
 | Regla de monto | Sí (vía BAdI) | Sí | Sí | Sí |
 | Latencia | Inmediata | 1–5 min | 5–15 min | 5–15 min |
