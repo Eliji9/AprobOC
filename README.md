@@ -12,7 +12,7 @@ rangos de monto.
 | Tema | ECC (actual) | S/4HANA Private (objetivo) |
 |---|---|---|
 | Liberación | Estrategia clásica (`T16FS`) + `BAPI_PO_RELEASE` | Flexible Workflow (tarea `TS00800531`) |
-| Regla | Rangos de monto en USD por código de liberación (`ZMM_COD_PED`) | Rangos de monto por nivel de aprobación |
+| Regla | Rangos de monto por código de liberación (`ZMM_COD_PED`) | Rangos de monto por nivel de aprobación |
 | Ejecutor | Usuario genérico creador del job | Según la opción elegida |
 
 **Alcance:** solo la aprobación automática. Los procesos post-liberación (Coupa, anticipo,
@@ -30,7 +30,7 @@ MIGO) quedan fuera de alcance por ahora.
 | Toca el workflow | BAdIs + configuración | No | No | No |
 | Clean core | ≈ 95 % | ≈ 80 % | ≈ 85 % | ≈ 85 % |
 | Acceso a la tarea | No aplica | Wrapper (reenvía y decide) | Servicio OData + wrapper de B | Servicio OData + wrapper de B |
-| Regla en USD | Sí (vía BAdI) | Sí | Sí | Sí |
+| Regla de monto | Sí (vía BAdI) | Sí | Sí | Sí |
 | Latencia | Inmediata | 1–5 min | 5–15 min | 5–15 min |
 | Costo adicional | Ninguno | Ninguno | Ninguno (licencia disponible) | Licencias + AI Units |
 | Viabilidad | Alta, bloqueada | Alta | Media | Media–baja |

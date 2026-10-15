@@ -216,7 +216,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <div class="lane-h"><b>Liberación</b><span class="loop-badge">↻ por cada código</span></div>
       <div class="step"><span class="ico"><svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v3"/></svg></span><div class="st-txt"><b>Siguiente código</b><code>T16FS · FRGC1…8</code></div></div>
       <div class="step dec"><span class="ico"><svg viewBox="0 0 24 24"><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7v.5M12 17h.01"/></svg></span><div class="st-txt"><b>¿Código aprobable?</b><code>ZMM_COD_PED</code><span class="tags"><span class="t-no">No → fin</span></span></div></div>
-      <div class="step"><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v18M16 7H10a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6H8"/></svg></span><div class="st-txt"><b>Total en USD</b><code>Σ cantidad × precio</code></div></div>
+      <div class="step"><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v18M16 7H10a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6H8"/></svg></span><div class="st-txt"><b>Total de la OC</b><code>Σ cantidad × precio</code></div></div>
       <div class="step dec"><span class="ico"><svg viewBox="0 0 24 24"><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7v.5M12 17h.01"/></svg></span><div class="st-txt"><b>¿Dentro del rango?</b><code>valfrom – valto</code><span class="tags"><span class="t-no">No → queda manual</span></span></div></div>
       <div class="step act"><span class="ico"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><div class="st-txt"><b>Liberar</b><code>BAPI_PO_RELEASE</code><span class="tags"><span class="t-bad">WAIT 5 s</span></span></div></div>
     </div>
@@ -239,12 +239,12 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
     <div class="opt-head">
       <div class="head-row"><span class="tag">OPCIÓN A</span><span class="state blocked">No implementable hoy</span></div>
       <h2>Flexible Workflow con condiciones por BAdI</h2>
-      <p>Se agregan condiciones custom (monto en USD y los campos que pida la regla) con los BAdIs del Flexible Workflow. Si ningún paso aplica, el workflow libera la OC solo.</p>
+      <p>Se agregan condiciones custom (monto y los campos que pida la regla) con los BAdIs del Flexible Workflow. Si ningún paso aplica, el workflow libera la OC solo.</p>
     </div>
     <div class="sec">
       <h3>Solución</h3>
       <ol class="flow">
-        <li><div><span class="where">S/4 · BAdIs del Flexible Workflow (otro equipo)</span><span class="what"><code>SWF_WORKFLOW_CONDITION_DEF</code> define las condiciones nuevas; <code>SWF_WORKFLOW_CONDITION_EVAL</code> las evalúa (monto USD, campos adicionales).</span></div></li>
+        <li><div><span class="where">S/4 · BAdIs del Flexible Workflow (otro equipo)</span><span class="what"><code>SWF_WORKFLOW_CONDITION_DEF</code> define las condiciones nuevas; <code>SWF_WORKFLOW_CONDITION_EVAL</code> las evalúa (monto y campos adicionales).</span></div></li>
         <li><div><span class="where">S/4 · Manage Workflows for Purchase Orders</span><span class="what">Pasos de aprobación por nivel usando esas condiciones.</span></div></li>
         <li><div><span class="where">S/4 · Flexible Workflow estándar</span><span class="what">Si ningún paso aplica, la OC se libera al guardarse, sin aprobador técnico.</span></div></li>
       </ol>
@@ -255,7 +255,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
         <thead><tr><th>Objeto</th><th>Tipo</th><th>Tier</th></tr></thead>
         <tbody>
           <tr><td class="obj">Implementación BAdI</td><td><code>SWF_WORKFLOW_CONDITION_DEF / _EVAL</code> (otro equipo)</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">Regla de monto USD</td><td>Clase ABAP llamada desde el BAdI</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">Regla de monto</td><td>Clase ABAP llamada desde el BAdI</td><td><span class="tier t1">T1</span></td></tr>
           <tr><td class="obj">Pasos del workflow</td><td>Configuración en la app estándar</td><td><span class="tier std">Estándar</span></td></tr>
         </tbody>
       </table></div>
@@ -274,7 +274,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
           <li>La opción más clean core</li>
           <li>Liberación inmediata, sin job</li>
           <li>Sin aprobador técnico: la OC "no requirió aprobación"</li>
-          <li>Regla en USD y campos adicionales</li>
+          <li>Regla de monto y campos adicionales</li>
         </ul></div>
         <div class="con"><h3>Contras</h3><ul>
           <li>Requiere tocar los BAdIs, a cargo de otro equipo</li>
@@ -297,16 +297,16 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
     <div class="opt-head">
       <div class="head-row"><span class="tag">OPCIÓN B</span><span class="state reco">Recomendada hoy</span></div>
       <h2>Application Job aprobador en S/4</h2>
-      <p>Un job con el usuario genérico busca las tareas pendientes, evalúa la regla en USD y aprueba. Es el reemplazo directo del job de ECC.</p>
+      <p>Un job con el usuario genérico busca las tareas pendientes, evalúa la regla de monto y aprueba. Es el reemplazo directo del job de ECC.</p>
     </div>
     <div class="sec">
       <h3>Solución</h3>
       <ol class="flow">
         <li><div><span class="where">S/4 · Flexible Workflow (sin cambios)</span><span class="what">La OC entra a aprobación según la configuración actual.</span></div></li>
-        <li><div><span class="where">S/4 · Application Job, cada 1–5 min</span><span class="what">Busca las OC "En proc. autorización" con la CDS released <code>I_PurchaseOrderAPI01</code> y calcula el total en USD con la clase de reglas.</span></div></li>
+        <li><div><span class="where">S/4 · Application Job, cada 1–5 min</span><span class="what">Busca las OC "En proc. autorización" con la CDS released <code>I_PurchaseOrderAPI01</code> y calcula el total con la clase de reglas.</span></div></li>
         <li><div><span class="where">S/4 · Wrapper Tier 2</span><span class="what">Solo para las OC que cumplen la regla, busca su work item <code>TS00800531</code> abierto y el nivel (tareas completadas + 1).</span></div></li>
         <li><div><span class="where">S/4 · Wrapper Tier 2</span><span class="what">Si cumple el rango del nivel, reenvía la tarea a <code>ZJOBPROCESOS</code> y la aprueba con <code>/IWWRK/WF_TGW_TASK_DET_ACTION</code> (validado en PoC 2). Si no cumple, queda para aprobación manual.</span></div></li>
-        <li><div><span class="where">S/4 · Application Log</span><span class="what">Registra OC, nivel, monto USD y rango aplicado.</span></div></li>
+        <li><div><span class="where">S/4 · Application Log</span><span class="what">Registra OC, nivel, monto y rango aplicado.</span></div></li>
       </ol>
     </div>
     <div class="sec">
@@ -315,7 +315,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
         <thead><tr><th>Objeto</th><th>Tipo</th><th>Tier</th></tr></thead>
         <tbody>
           <tr><td class="obj">ZMM_PO_APPR_RULE</td><td>Tabla BD + mantenimiento de configuración</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZCL_MM_PO_APPROVAL_RULES</td><td>Clase ABAP (total USD y rango)</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">ZCL_MM_PO_APPROVAL_RULES</td><td>Clase ABAP (total y rango)</td><td><span class="tier t1">T1</span></td></tr>
           <tr><td class="obj">ZCL_MM_PO_APPR_JOB</td><td>Clase de Application Job + catálogo + plantilla</td><td><span class="tier t1">T1</span></td></tr>
           <tr><td class="obj">ZCL_MM_WF_DECISION_API</td><td>Clase wrapper (buscar tareas, reenviar y aprobar)</td><td><span class="tier t2">T2 · C1</span></td></tr>
         </tbody>
@@ -333,7 +333,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <div class="pc">
         <div class="pro"><h3>Pros</h3><ul>
           <li>No toca el Flexible Workflow</li>
-          <li>Regla exacta en USD, como en ECC</li>
+          <li>Misma regla de monto que en ECC</li>
           <li>Sin licencias ni costo adicional</li>
           <li>Todo en S/4, pocos puntos de falla</li>
           <li>Disponible ya</li>
@@ -367,7 +367,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <h3>Solución</h3>
       <ol class="flow">
         <li><div><span class="where">S/4 · Flexible Workflow (sin cambios)</span><span class="what">La OC entra a aprobación según la configuración actual.</span></div></li>
-        <li><div><span class="where">BTP · Proceso programado, cada 5–15 min</span><span class="what">Consulta el servicio OData de S/4: tareas <code>TS00800531</code> pendientes con OC, nivel y total USD.</span></div></li>
+        <li><div><span class="where">BTP · Proceso programado, cada 5–15 min</span><span class="what">Consulta el servicio OData de S/4: tareas <code>TS00800531</code> pendientes con OC, nivel y total.</span></div></li>
         <li><div><span class="where">BTP · Tabla de decisión de Build</span><span class="what">Evalúa nivel y monto contra los rangos que define el negocio.</span></div></li>
         <li><div><span class="where">BTP → S/4 · Destino</span><span class="what">Si cumple, llama la acción "aprobar" del servicio: reenvío + decisión con el wrapper de la opción B. Ver "Cómo aprueban C y D".</span></div></li>
       </ol>
@@ -377,10 +377,10 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <div class="tbl-wrap"><table>
         <thead><tr><th>Objeto</th><th>Tipo</th><th>Tier</th></tr></thead>
         <tbody>
-          <tr><td class="obj">ZR_MM_PO_APPR_TASK</td><td>Servicio OData RAP (entidad custom): tareas pendientes con OC, nivel y total USD + acción "aprobar"</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">ZR_MM_PO_APPR_TASK</td><td>Servicio OData RAP (entidad custom): tareas pendientes con OC, nivel y total + acción "aprobar"</td><td><span class="tier t1">T1</span></td></tr>
           <tr><td class="obj">ZCL_MM_WF_DECISION_API</td><td>Clase wrapper (reenvío + decisión), el mismo de la opción B</td><td><span class="tier t2">T2 · C1</span></td></tr>
           <tr><td class="obj">Proceso programado</td><td>SAP Build Process Automation</td><td><span class="tier sbs">BTP</span></td></tr>
-          <tr><td class="obj">Tabla de decisión</td><td>Regla de negocio de Build (rangos USD por nivel)</td><td><span class="tier sbs">BTP</span></td></tr>
+          <tr><td class="obj">Tabla de decisión</td><td>Regla de negocio de Build (rangos de monto por nivel)</td><td><span class="tier sbs">BTP</span></td></tr>
           <tr><td class="obj">Destino + Actions</td><td>BTP Destination + SAP Build Actions</td><td><span class="tier sbs">BTP</span></td></tr>
         </tbody>
       </table></div>
@@ -416,6 +416,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
         <li>Mecanismo de aprobación ya validado (el mismo de B)</li>
         <li>Conectividad BTP → S/4 y licencia de Build disponibles</li>
         <li>Pendiente: proceso programado y frecuencia del disparador</li>
+        <li>Latencia: la marca la frecuencia del disparador programado en Build, más las llamadas BTP → S/4 por cada OC (listar, evaluar, aprobar)</li>
       </ul>
     </div>
   </section>
@@ -441,7 +442,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
         <thead><tr><th>Objeto</th><th>Tipo</th><th>Tier</th></tr></thead>
         <tbody>
           <tr><td class="obj">ZMM_PO_APPR_RULE</td><td>Tabla BD + mantenimiento de configuración</td><td><span class="tier t1">T1</span></td></tr>
-          <tr><td class="obj">ZCL_MM_PO_APPROVAL_RULES</td><td>Clase ABAP (total USD y rango)</td><td><span class="tier t1">T1</span></td></tr>
+          <tr><td class="obj">ZCL_MM_PO_APPROVAL_RULES</td><td>Clase ABAP (total y rango)</td><td><span class="tier t1">T1</span></td></tr>
           <tr><td class="obj">ZR_MM_PO_APPR_TASK</td><td>Servicio OData RAP: tareas pendientes, evaluación + acción "aprobar"</td><td><span class="tier t1">T1</span></td></tr>
           <tr><td class="obj">Agente + 3 skills</td><td>Joule Studio (buscar, evaluar, aprobar)</td><td><span class="tier sbs">BTP</span></td></tr>
           <tr><td class="obj">Proceso + destino</td><td>Build Process Automation + Destination</td><td><span class="tier sbs">BTP</span></td></tr>
@@ -476,7 +477,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <h3>Viabilidad</h3>
       <span class="pill baja">Media–baja</span>
       <ul>
-        <li>Costo estimado (agente Standard, 0,01 AI Units/paso): cada 15 min ≈ <b>58 AI Units/mes</b> solo en revisar; cada 5 min ≈ <b>173</b>; más ≈ 0,04 por OC aprobada</li>
+        <li>Costo por OC aprobada (agente Standard, 0,01 AI Units por paso): 5 pasos ≈ <b>0,05 AI Units</b> (disparo, listar, evaluar, aprobar, cierre). Una corrida sin OC ≈ 0,02.</li>
         <li>El disparo desatendido pasa por Build Process Automation</li>
         <li>Aprobación: mismo servicio y wrapper de C, ya validado en B</li>
       </ul>
@@ -488,7 +489,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
   <h2>Cómo aprueban C y D</h2>
   <p class="lead2">BTP no llama a <code>TASKPROCESSING</code>. Llama a un servicio OData propio en S/4 que reutiliza el mecanismo de aprobación validado para la opción B. Así no se necesita sustitución ni que el usuario técnico sea agente de la tarea de antemano. En C lo orquesta un proceso con pasos fijos; en D, un agente.</p>
   <div class="calls">
-    <div class="call"><span class="verb">1 · GET</span><b>PendingTasks</b><span>Tareas TS00800531 pendientes con OC, nivel y total USD</span></div>
+    <div class="call"><span class="verb">1 · GET</span><b>PendingTasks</b><span>Tareas TS00800531 pendientes con OC, nivel y total</span></div>
     <div class="call"><span class="verb">2 · BTP</span><b>Tabla de decisión</b><span>¿El total está en el rango del nivel?</span></div>
     <div class="call"><span class="verb">3 · POST</span><b>approve</b><span>Acción del servicio: reenvío + decisión con el wrapper de B</span></div>
   </div>
@@ -508,7 +509,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <tr><td>Código propio</td><td>BAdI + clase de reglas</td><td>4 objetos</td><td>Servicio + wrapper + BTP</td><td>Servicio + wrapper + reglas + BTP</td></tr>
       <tr><td>Clean core</td><td class="win">≈ 95 %</td><td>≈ 80 %</td><td>≈ 85 %</td><td>≈ 85 %</td></tr>
       <tr><td>Acceso a la tarea</td><td>No aplica</td><td>Wrapper (reenvía y decide)</td><td>Servicio OData + wrapper de B</td><td>Servicio OData + wrapper de B</td></tr>
-      <tr><td>Regla en USD</td><td class="win">Sí (vía BAdI)</td><td class="win">Sí</td><td class="win">Sí</td><td class="win">Sí</td></tr>
+      <tr><td>Regla de monto</td><td class="win">Sí (vía BAdI)</td><td class="win">Sí</td><td class="win">Sí</td><td class="win">Sí</td></tr>
       <tr><td>Quién libera</td><td class="win">El workflow</td><td>Usuario genérico admin.</td><td>Usuario técnico vía BTP</td><td>Usuario técnico vía BTP</td></tr>
       <tr><td>Quién mantiene la regla</td><td>Otro equipo (BAdI) + admin. de workflow</td><td>Negocio (app de configuración)</td><td class="win">Negocio (tabla de Build)</td><td>Negocio / desarrollo</td></tr>
       <tr><td>Latencia</td><td class="win">Inmediata</td><td>1–5 min</td><td>5–15 min</td><td>5–15 min</td></tr>
