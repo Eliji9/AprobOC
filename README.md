@@ -28,8 +28,8 @@ MIGO) quedan fuera de alcance por ahora.
 |---|---|---|---|---|
 | Disponible hoy | No (config congelada) | Sí | Sí, con licencia | Sí, con licencias |
 | Toca el workflow | Configuración | No | No | No |
-| Clean core | 100 % estándar | ≈ 80 % | ≈ 85–100 % | ≈ 85–100 % |
-| Acceso a la tarea | No aplica | Wrapper (reenvía y decide) | Sustitución, wrapper o API released | Sustitución, wrapper o API released |
+| Clean core | 100 % estándar | ≈ 80 % | ≈ 85 % | ≈ 85 % |
+| Acceso a la tarea | No aplica | Wrapper (reenvía y decide) | Servicio OData + wrapper de B | Servicio OData + wrapper de B |
 | Regla en USD | No, por moneda | Sí | Sí | Sí |
 | Latencia | Inmediata | 1–5 min | 5–15 min | 5–15 min |
 | Costo adicional | Ninguno | Ninguno | Licencia Build | Licencias + AI Units |
@@ -48,19 +48,10 @@ productivos; los programas de `poc/` son desechables ($TMP, solo DS4).
 
 | ID | Opción | Prueba | Estado |
 |---|---|---|---|
-| PoC 1 | B, C, D | Aprobación vía My Inbox (`TASKPROCESSING`) con reenvío previo | Validada |
-| B1 | B | Aprobación por programa (`/IWWRK/WF_TGW_TASK_DET_ACTION`, `'Decision'`, `'0001'`) | Validada |
-| B2 | B | OC multinivel: nivel = tareas completadas + 1; aparece la tarea siguiente | Pendiente |
-| B3 | B | Ejecución en fondo (SM36) con `ZJOBPROCESOS` | Pendiente |
-| B4 | B | Agente excluido (OC creada por el usuario del job) como excepción | Pendiente |
-| B5 | B | Falla tras reenviar: devolver la tarea al aprobador | Pendiente |
-| B6 | B | Total USD con API released vs. valor de ECC | Pendiente |
-| B7 | B | Wrapper Tier 2 liberado C1 llamado desde ABAP Cloud (ATC) | Pendiente |
-| C1 | C, D | Destino BTP → DS4 y GET de `TASKPROCESSING` con usuario técnico | Pendiente |
-| C2 | C, D | Sustitución: `ZJOBPROCESOS` ve las tareas del aprobador sustituido | Pendiente |
-| C3 | C, D | Si C2 no aplica: servicio OData custom con acción "aprobar" | Pendiente |
-| C4 | C, D | Proceso programado + tabla de decisión + `POST Decision` con CSRF | Pendiente |
-| C5 | C, D | Licencia y subaccount de Build Process Automation | Pendiente |
+| C1 | C, D | Destino BTP → DS4 (Cloud Connector / RISE) y GET a un servicio de S/4 desde BTP | Pendiente |
+| C2 | C, D | Servicio OData de prueba: tareas pendientes + acción "aprobar" que reutiliza reenvío + decisión | Pendiente |
+| C3 | C, D | Proceso programado en Build: frecuencia, tabla de decisión y acción con CSRF | Pendiente |
+| C4 | C, D | Licencia y subaccount de Build Process Automation | Pendiente |
 | D2 | D | Joule Studio y agente con 3 skills | Pendiente |
 | D3 | D | Disparo desatendido desde proceso programado | Pendiente |
 | D4 | D | Medir pasos por corrida y por OC (AI Units) | Pendiente |
@@ -69,7 +60,7 @@ productivos; los programas de `poc/` son desechables ($TMP, solo DS4).
 | A2–A3 | A | Liberación automática y multinivel en sandbox | Bloqueada |
 | X1 | Todas | Mapeo de rangos de `ZMM_COD_PED` a niveles | Pendiente |
 | X2 | Todas | ¿Una tarea por nivel o aprobadores en paralelo? | Pendiente |
-| X3 | B, C, D | Auditoría acepta usuario técnico / sustitución | Pendiente |
+| X3 | B, C, D | Auditoría acepta aprobación por usuario técnico | Pendiente |
 | X4 | A | ¿Umbrales por moneda en lugar de USD? | Pendiente |
 
 ## Estructura prevista
