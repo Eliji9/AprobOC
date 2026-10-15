@@ -41,15 +41,36 @@ si el negocio quiere mantener los rangos en BTP y ya tiene licencia de Build.
 
 ## Estado
 
-- [x] Prueba de concepto 1: aprobación vía My Inbox validada (OC 1100000502 y 1100000503 autorizadas) — B, C, D
-- [x] Prueba de concepto 2: aprobación por programa validada (OC 1100000508) llamando `/IWWRK/WF_TGW_TASK_DET_ACTION` directo (`poc/ZTEST_WF_TGW_APPROVE.abap`) — B
-- [ ] Mapeo de rangos de `ZMM_COD_PED` a niveles del Flexible Workflow (negocio) — todas
-- [ ] Frecuencia mínima del Application Job y autorizaciones del usuario genérico — B
-- [ ] Licencia y subaccount de SAP Build Process Automation — C, D
-- [ ] Acceso del usuario técnico a las tareas: ¿auditoría acepta la sustitución? — C, D
-- [ ] API released para leer y decidir work items en Business Accelerator Hub — C, D
-- [ ] Fecha estimada de fin de las pruebas integrales del workflow — A
-- [ ] ¿El negocio acepta umbrales por moneda en lugar de USD? — A
+Fase actual: **análisis y diseño de solución, pruebas de concepto**. No se construyen aún objetos
+productivos; los programas de `poc/` son desechables ($TMP, solo DS4).
+
+### Pruebas de concepto
+
+| ID | Opción | Prueba | Estado |
+|---|---|---|---|
+| PoC 1 | B, C, D | Aprobación vía My Inbox (`TASKPROCESSING`) con reenvío previo | Validada |
+| B1 | B | Aprobación por programa (`/IWWRK/WF_TGW_TASK_DET_ACTION`, `'Decision'`, `'0001'`) | Validada |
+| B2 | B | OC multinivel: nivel = tareas completadas + 1; aparece la tarea siguiente | Pendiente |
+| B3 | B | Ejecución en fondo (SM36) con `ZJOBPROCESOS` | Pendiente |
+| B4 | B | Agente excluido (OC creada por el usuario del job) como excepción | Pendiente |
+| B5 | B | Falla tras reenviar: devolver la tarea al aprobador | Pendiente |
+| B6 | B | Total USD con API released vs. valor de ECC | Pendiente |
+| B7 | B | Wrapper Tier 2 liberado C1 llamado desde ABAP Cloud (ATC) | Pendiente |
+| C1 | C, D | Destino BTP → DS4 y GET de `TASKPROCESSING` con usuario técnico | Pendiente |
+| C2 | C, D | Sustitución: `ZJOBPROCESOS` ve las tareas del aprobador sustituido | Pendiente |
+| C3 | C, D | Si C2 no aplica: servicio OData custom con acción "aprobar" | Pendiente |
+| C4 | C, D | Proceso programado + tabla de decisión + `POST Decision` con CSRF | Pendiente |
+| C5 | C, D | Licencia y subaccount de Build Process Automation | Pendiente |
+| D2 | D | Joule Studio y agente con 3 skills | Pendiente |
+| D3 | D | Disparo desatendido desde proceso programado | Pendiente |
+| D4 | D | Medir pasos por corrida y por OC (AI Units) | Pendiente |
+| D5 | D | Determinismo de la decisión del agente | Pendiente |
+| A1 | A | Condiciones disponibles en *Manage Workflows for Purchase Orders* (solo lectura) | Pendiente |
+| A2–A3 | A | Liberación automática y multinivel en sandbox | Bloqueada |
+| X1 | Todas | Mapeo de rangos de `ZMM_COD_PED` a niveles | Pendiente |
+| X2 | Todas | ¿Una tarea por nivel o aprobadores en paralelo? | Pendiente |
+| X3 | B, C, D | Auditoría acepta usuario técnico / sustitución | Pendiente |
+| X4 | A | ¿Umbrales por moneda en lugar de USD? | Pendiente |
 
 ## Estructura prevista
 

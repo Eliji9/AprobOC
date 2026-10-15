@@ -157,6 +157,24 @@ td.obj{font-family:var(--mono);font-size:.8rem;word-break:break-word}
 .warnbox{border-left:4px solid var(--warn);background:var(--warn-soft);border-radius:6px;padding:12px 14px;font-size:.9rem;display:flex;flex-direction:column;gap:4px}
 .warnbox b{color:var(--warn)}
 
+.poc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.poc .lead2{color:var(--muted);font-size:.92rem;max-width:85ch}
+.res{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.res{grid-template-columns:1fr}}
+.res-card{border:1px solid var(--line);border-left:4px solid var(--good);border-radius:8px;padding:12px 14px;background:var(--bg);display:flex;flex-direction:column;gap:6px;min-width:0}
+.res-card b{font-size:.95rem}
+.res-card ol{margin:0;padding-left:18px;font-size:.86rem;display:flex;flex-direction:column;gap:3px}
+.ok{font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--good-soft);color:var(--good);align-self:flex-start}
+.find{margin:0;padding-left:18px;font-size:.88rem;display:flex;flex-direction:column;gap:5px}
+.tests{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.tests{grid-template-columns:1fr}}
+.test-card{border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:8px;padding:12px 14px;background:var(--bg);display:flex;flex-direction:column;gap:8px;min-width:0;--accent:var(--teal)}
+.test-card.ta{--accent:var(--slate)} .test-card.tb{--accent:var(--teal)} .test-card.tc{--accent:var(--violet)} .test-card.td{--accent:var(--blue)} .test-card.tx{--accent:var(--muted)}
+.test-card h3{color:var(--accent)}
+.test-card table td:first-child{font-family:var(--mono);font-size:.76rem;color:var(--muted);white-space:nowrap}
+.st{font-size:.7rem;font-weight:600;padding:1px 7px;border-radius:999px;white-space:nowrap}
+.st.done{background:var(--good-soft);color:var(--good)} .st.todo{background:var(--warn-soft);color:var(--warn)} .st.blk{background:var(--slate-soft);color:var(--slate)}
+
 .pend{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
 .pend ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;font-size:.88rem}
 .pend .for{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-left:4px}
@@ -174,6 +192,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
     <span class="chip">Alcance: <b>solo aprobación automática</b></span>
     <span class="chip">Post-liberación (Coupa, anticipo, MIGO): <b>fuera de alcance por ahora</b></span>
     <span class="chip">Tarea de aprobación: <b>TS00800531</b></span>
+    <span class="chip">Prueba de concepto: <b>aprobación por programa validada en DS4</b></span>
     <span class="chip alert">Configuración del Flexible Workflow: <b>congelada por pruebas integrales</b></span>
   </div>
 </header>
@@ -210,6 +229,52 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <div class="step act"><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span><div class="st-txt"><b>MIGO</b><code>ZFMMM_MIGO_CREATE</code></div></div>
     </div>
   </div>
+</section>
+
+<section class="poc" aria-label="Resultados de la prueba de concepto">
+  <h2>Resultados de la prueba de concepto · DS4 · 15-10-2026</h2>
+  <p class="lead2">Se validó que un usuario distinto al aprobador puede aprobar una tarea <code>TS00800531</code> y que la OC queda liberada con la lógica estándar de MM. La aprobación pasa por la misma cadena que usa My Inbox.</p>
+  <div class="res">
+    <div class="res-card">
+      <span class="ok">Validada</span>
+      <b>PoC 1 · Aprobación vía My Inbox (TASKPROCESSING)</b>
+      <ol>
+        <li>Reenvío con <code>SAP_WAPI_FORWARD_WORKITEM</code></li>
+        <li><code>POST Decision</code> · origen <code>LOCAL_TGW</code> · clave <code>0001</code></li>
+        <li>OC 1100000502 y 1100000503 → <b>Autorizado</b></li>
+      </ol>
+      <span class="note">Aplica a las opciones B, C y D.</span>
+    </div>
+    <div class="res-card">
+      <span class="ok">Validada</span>
+      <b>PoC 2 · Aprobación por programa, sin HTTP</b>
+      <ol>
+        <li>Reenvío con <code>SAP_WAPI_FORWARD_WORKITEM</code></li>
+        <li><code>/IWWRK/WF_TGW_TASK_DET_ACTION</code> con <code>'Decision'</code> y <code>'0001'</code></li>
+        <li>OC 1100000508 (19.750 USD) → <b>Autorizado</b></li>
+      </ol>
+      <span class="note">Base del wrapper Tier 2 de la opción B.</span>
+    </div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Cadena de aprobación (pila del debugger)</th><th>Rol</th></tr></thead>
+    <tbody>
+      <tr><td><code>/IWPGW/CL_TGW_EDP_TASK → ACTION_DECISION</code></td><td>Servicio TASKPROCESSING (My Inbox)</td></tr>
+      <tr><td><code>/IWWRK/WF_TGW_TASK_DET_ACTION</code></td><td>Punto de entrada en el backend</td></tr>
+      <tr><td><code>/IWWRK/CL_WF_UPDATE_WORKITEM → OPERATION_DECISION</code></td><td>Framework de decisión</td></tr>
+      <tr><td><code>CL_MM_PUR_PO_APPR_ACTIONS_BADI → BEFORE_UPDATE</code></td><td>Lógica estándar MM de aprobación de OC</td></tr>
+      <tr><td><code>CL_MM_PUR_WF_OBJECT → SET_WORKITEM_EXECUTED</code></td><td>MM registra el resultado</td></tr>
+      <tr><td><code>SAP_WAPI_WORKITEM_COMPLETE</code></td><td>Cierre técnico del work item</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Hallazgos</h3>
+  <ul class="find">
+    <li><code>SAP_WAPI_DECISION_COMPLETE</code> no sirve: la tarea del Flexible Workflow no es una decisión clásica.</li>
+    <li>Sin reenvío, <code>TASKPROCESSING</code> responde <code>/IWWRK/WF_ODC/004</code> "No tiene acceso al elemento": solo opera tareas del usuario conectado.</li>
+    <li>El reenvío no salta a los <b>agentes excluidos</b> (por ejemplo, el creador de la OC). El usuario del job no debe crear OC y esas tareas quedan como excepción.</li>
+    <li>Se usa el ID del <b>paso de diálogo</b> <code>TS00800531</code>, no el del workflow padre <code>WS00800238</code>.</li>
+    <li>La operación se envía como <code>'Decision'</code> (sensible a mayúsculas); <code>'EXEC'</code> devuelve "La operación no existe".</li>
+  </ul>
 </section>
 
 <div class="grid">
@@ -279,7 +344,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <ol class="flow">
         <li><div><span class="where">S/4 · Flexible Workflow (sin cambios)</span><span class="what">La OC entra a aprobación según la configuración actual.</span></div></li>
         <li><div><span class="where">S/4 · Application Job, cada 1–5 min</span><span class="what">Busca tareas TS00800531 abiertas y calcula el total en USD con la clase de reglas.</span></div></li>
-        <li><div><span class="where">S/4 · Wrapper Tier 2</span><span class="what">Si cumple el rango del nivel, reenvía la tarea al usuario genérico (si no es agente) y la aprueba. Si no cumple, queda para aprobación manual.</span></div></li>
+        <li><div><span class="where">S/4 · Wrapper Tier 2</span><span class="what">Si cumple el rango del nivel, reenvía la tarea a <code>ZJOBPROCESOS</code> y la aprueba con <code>/IWWRK/WF_TGW_TASK_DET_ACTION</code> (validado en PoC 2). Si no cumple, queda para aprobación manual.</span></div></li>
         <li><div><span class="where">S/4 · Application Log</span><span class="what">Registra OC, nivel, monto USD y rango aplicado.</span></div></li>
       </ol>
     </div>
@@ -322,9 +387,10 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
     </div>
     <div class="sec via">
       <h3>Viabilidad</h3>
-      <span class="pill alta">Alta</span>
+      <span class="pill alta">Alta · mecanismo validado</span>
       <ul>
-        <li>Depende de la prueba de concepto de la decisión sobre TS00800531</li>
+        <li>Aprobación por programa validada en DS4 (PoC 1 y 2)</li>
+        <li>Pendiente: multinivel, ejecución en fondo con <code>ZJOBPROCESOS</code> y wrapper Tier 2 consumido desde ABAP Cloud</li>
         <li>Validar con Basis la frecuencia mínima del job y las autorizaciones del usuario genérico</li>
       </ul>
     </div>
@@ -474,7 +540,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
   </div>
   <div class="warnbox">
     <b>Punto crítico</b>
-    <span><code>TASKPROCESSING</code> es el inbox del usuario conectado: solo devuelve las tareas donde ese usuario es agente. Un usuario administrador no ve las tareas de otros por esta vía, y la configuración del workflow está congelada, así que no se puede agregar como aprobador.</span>
+    <span><code>TASKPROCESSING</code> es el inbox del usuario conectado: solo devuelve las tareas donde ese usuario es agente. Un usuario administrador no ve las tareas de otros por esta vía, y la configuración del workflow está congelada, así que no se puede agregar como aprobador. <b>Confirmado en DS4:</b> sin reenvío responde <code>/IWWRK/WF_ODC/004</code>; con reenvío previo la aprobación funciona.</span>
   </div>
   <div class="tbl-wrap"><table>
     <thead><tr><th>Camino de acceso a la tarea</th><th>Cómo</th><th>Impacto</th></tr></thead>
@@ -501,6 +567,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <tr><td>Quién mantiene la regla</td><td>Admin. de workflow</td><td>Negocio (app de configuración)</td><td class="win">Negocio (tabla de Build)</td><td>Negocio / desarrollo</td></tr>
       <tr><td>Latencia</td><td class="win">Inmediata</td><td>1–5 min</td><td>5–15 min</td><td>5–15 min</td></tr>
       <tr><td>Costo adicional</td><td class="win">Ninguno</td><td class="win">Ninguno</td><td>Licencia Build</td><td>Licencias + AI Units</td></tr>
+      <tr><td>Prueba de concepto</td><td>No ejecutable hoy</td><td class="win">Mecanismo validado</td><td>Parcial (acceso confirmado)</td><td>Parcial (acceso confirmado)</td></tr>
       <tr><td>Viabilidad</td><td>Alta, bloqueada</td><td class="win">Alta</td><td>Media</td><td>Media–baja</td></tr>
     </tbody>
   </table></div>
@@ -516,18 +583,59 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
   </div>
 </section>
 
-<section class="pend">
-  <h2>Validaciones pendientes</h2>
-  <ul>
-    <li>Prueba de concepto de la decisión sobre TS00800531: <code>TASKPROCESSING</code> y <code>SAP_WAPI_DECISION_COMPLETE</code>. Si <code>TaskCollection</code> sale vacío, el usuario no es agente: probar como sustituto de un aprobador <span class="for">B · C · D</span></li>
-    <li>Acceso del usuario técnico a las tareas: ¿auditoría acepta la sustitución? <span class="for">C · D</span></li>
-    <li>Verificar en Business Accelerator Hub si hay una API released para leer y decidir work items <span class="for">C · D</span></li>
-    <li>Mapeo de los rangos de <code>ZMM_COD_PED</code> (por código de liberación) a niveles del Flexible Workflow <span class="for">todas</span></li>
-    <li>Frecuencia mínima del Application Job y autorizaciones del usuario genérico <span class="for">B</span></li>
-    <li>Licencia y subaccount de SAP Build Process Automation <span class="for">C · D</span></li>
-    <li>Fecha estimada de fin de las pruebas integrales del workflow <span class="for">A</span></li>
-    <li>¿El negocio acepta umbrales por moneda en lugar de un umbral en USD? <span class="for">A</span></li>
-  </ul>
+<section class="pend" aria-label="Pruebas pendientes por opción">
+  <h2>Pruebas de concepto pendientes por opción</h2>
+  <div class="tests">
+    <div class="test-card tb">
+      <h3>Opción B · Job S/4</h3>
+      <div class="tbl-wrap"><table><tbody>
+        <tr><td>B1</td><td>Aprobación por programa (reenvío + decisión)</td><td><span class="st done">Hecha</span></td></tr>
+        <tr><td>B2</td><td>OC con 2 o más niveles: el nivel se calcula como tareas completadas + 1 y aparece la tarea siguiente</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>B3</td><td>Ejecutar el programa en fondo (SM36) con <code>ZJOBPROCESOS</code>: autorizaciones y OC aprobada a su nombre</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>B4</td><td>Agente excluido: la OC creada por el usuario del job queda como excepción, sin bloquear la corrida</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>B5</td><td>Falla tras reenviar: la tarea no debe quedar retenida por el usuario del job (devolverla al aprobador)</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>B6</td><td>Total en USD con API released (conversión de moneda, unidad de precio, posiciones borradas) vs. valor de ECC</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>B7</td><td>Wrapper Tier 2 liberado C1 y llamado desde una clase ABAP Cloud (ATC sin errores)</td><td><span class="st todo">Pendiente</span></td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="test-card tc">
+      <h3>Opción C · Build Process Automation</h3>
+      <div class="tbl-wrap"><table><tbody>
+        <tr><td>C1</td><td>Destino BTP → DS4 (Cloud Connector o RISE) con usuario técnico; GET de <code>TASKPROCESSING</code> desde BTP</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>C2</td><td>Sustitución: <code>ZJOBPROCESOS</code> como sustituto de un aprobador y verificar que ve sus tareas en <code>TaskCollection</code></td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>C3</td><td>Si C2 no aplica: servicio OData custom con acción "aprobar" sobre el wrapper de B</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>C4</td><td>Proceso programado + tabla de decisión: frecuencia mínima, token CSRF y POST <code>Decision</code></td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>C5</td><td>Licencia y subaccount de Build Process Automation</td><td><span class="st todo">Pendiente</span></td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="test-card td">
+      <h3>Opción D · Agente Joule</h3>
+      <div class="tbl-wrap"><table><tbody>
+        <tr><td>D1</td><td>C1 a C4 (misma conectividad y acceso a la tarea)</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>D2</td><td>Joule Studio disponible en el subaccount y agente con 3 skills (buscar, evaluar, aprobar)</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>D3</td><td>Disparo desatendido desde un proceso programado</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>D4</td><td>Medir pasos reales por corrida y por OC para estimar AI Units</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>D5</td><td>Determinismo: con la misma OC, el agente siempre decide según el servicio de reglas</td><td><span class="st todo">Pendiente</span></td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="test-card ta">
+      <h3>Opción A · Configuración estándar</h3>
+      <div class="tbl-wrap"><table><tbody>
+        <tr><td>A1</td><td>Solo lectura: revisar en <i>Manage Workflows for Purchase Orders</i> las condiciones disponibles (monto neto, moneda)</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>A2</td><td>En un mandante sandbox: sin pasos aplicables, la OC se libera sola al guardar</td><td><span class="st blk">Bloqueada</span></td></tr>
+        <tr><td>A3</td><td>En sandbox: OC multinivel con umbrales por moneda</td><td><span class="st blk">Bloqueada</span></td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="test-card tx">
+      <h3>Transversales (negocio y control)</h3>
+      <div class="tbl-wrap"><table><tbody>
+        <tr><td>X1</td><td>Mapeo de rangos de <code>ZMM_COD_PED</code> (por código) a niveles del workflow</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>X2</td><td>¿Cada nivel genera una sola tarea, o hay aprobadores en paralelo?</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>X3</td><td>Auditoría acepta aprobación por usuario técnico (B, C, D) o sustitución (C, D)</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>X4</td><td>¿El negocio acepta umbrales por moneda en lugar de USD? (A)</td><td><span class="st todo">Pendiente</span></td></tr>
+      </tbody></table></div>
+    </div>
+  </div>
 </section>
 
 <footer>Octubre 2026. Porcentajes de clean core estimados por número de objetos. Los consumos de AI Units usan la tarifa publicada por SAP para agentes Standard y se deben confirmar con el AI Unit Estimator.</footer>
