@@ -7,7 +7,7 @@
 /* Layout: portada → hoy vs. mañana → lo comprobado → motor común (diagrama) → 4 opciones → semáforo comparativo → próximos pasos */
 :root{
   --bg:#f4f7fb; --surface:#ffffff; --fg:#13233d; --muted:#5a6880; --line:#dfe6ef;
-  --blue:#1663c7; --blue-soft:#e5effc; --teal:#0d8a80; --teal-soft:#e0f3f1;
+  --blue:#1663c7; --blue-soft:#e5effc; --teal:#b3122c; --teal-soft:#fbe6ea; --red-deep:#8e0e22;
   --slate:#566a88; --slate-soft:#e9edf3; --violet:#6551c4; --violet-soft:#eeebfa;
   --amber:#a86400; --amber-soft:#fcf1dd; --green:#1f7a43; --green-soft:#e3f3e9; --red:#b3392f; --red-soft:#fbe8e6;
   --dot-off:#d6dde8;
@@ -16,13 +16,13 @@
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0c1422; --surface:#142035; --fg:#e6edf6; --muted:#9eadc2; --line:#263552;
-  --blue:#6aa9f4; --blue-soft:#17305a; --teal:#4dcabd; --teal-soft:#0f3a37;
+  --blue:#6aa9f4; --blue-soft:#17305a; --teal:#f0737f; --teal-soft:#3d1520; --red-deep:#c42a3f;
   --slate:#a8b8d0; --slate-soft:#1e2b42; --violet:#a596f2; --violet-soft:#272150;
   --amber:#f2b85a; --amber-soft:#3c2b10; --green:#6dd394; --green-soft:#143423; --red:#f18a80; --red-soft:#3f1b18;
   --dot-off:#2c3a55; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0c1422; --surface:#142035; --fg:#e6edf6; --muted:#9eadc2; --line:#263552;
-  --blue:#6aa9f4; --blue-soft:#17305a; --teal:#4dcabd; --teal-soft:#0f3a37;
+  --blue:#6aa9f4; --blue-soft:#17305a; --teal:#f0737f; --teal-soft:#3d1520; --red-deep:#c42a3f;
   --slate:#a8b8d0; --slate-soft:#1e2b42; --violet:#a596f2; --violet-soft:#272150;
   --amber:#f2b85a; --amber-soft:#3c2b10; --green:#6dd394; --green-soft:#143423; --red:#f18a80; --red-soft:#3f1b18;
   --dot-off:#2c3a55; color-scheme:dark}
@@ -39,6 +39,15 @@ p{margin:0}
 .sec-head p{color:var(--muted);font-size:1.05rem}
 svg.i{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
+
+.brand-bar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--teal);color:#fff;border-radius:16px;padding:14px 20px}
+.brand-bar .title{font-family:var(--display);font-weight:600;font-size:1rem;letter-spacing:.02em}
+.logo-slot{height:52px;min-width:150px;border-radius:10px;background:#fff;display:grid;place-items:center;padding:6px 12px}
+.logo-slot img{max-height:40px;max-width:200px;display:block}
+.logo-slot .ph{font-family:var(--display);font-size:.8rem;font-weight:600;color:#8a8f99;border:1.5px dashed #c3c7cf;border-radius:8px;padding:6px 10px}
+.hero{border-left:6px solid var(--teal);padding-left:22px}
+.opt-top{border-bottom:3px solid var(--c)}
+.matrix thead th{border-bottom:3px solid var(--teal)}
 /* Portada */
 .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:center}
 @media (max-width:860px){.hero{grid-template-columns:1fr}}
@@ -99,7 +108,7 @@ svg.i{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .status i{width:9px;height:9px;border-radius:50%;background:currentColor;display:inline-block}
 .st-ok{background:var(--green-soft);color:var(--green)}
 .st-wait{background:var(--amber-soft);color:var(--amber)}
-.st-block{background:var(--red-soft);color:var(--red)}
+.st-block{background:var(--slate-soft);color:var(--slate)}
 .steps{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .step{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;flex:1;min-width:90px}
 .step .bub{width:52px;height:52px;border-radius:50%;background:var(--cs);color:var(--c);display:grid;place-items:center}
@@ -142,6 +151,11 @@ footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padd
 
 </head><body>
 <div class="wrap">
+
+<div class="brand-bar">
+  <div class="logo-slot"><img src="logo-cliente.png" alt="Logo del cliente" onerror="this.outerHTML='&lt;span class=&quot;ph&quot;&gt;Logo del cliente&lt;/span&gt;'"></div>
+  <span class="title">Análisis de solución · Compras S/4HANA</span>
+</div>
 
 <!-- Portada -->
 <section class="hero">
@@ -374,17 +388,7 @@ footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padd
   </div>
 </section>
 
-<!-- Próximos pasos -->
-<section style="display:flex;flex-direction:column;gap:18px">
-  <div class="sec-head"><span class="kicker">Qué sigue</span><h2>Próximos pasos por opción</h2></div>
-  <div class="road">
-    <div class="milestone b"><div class="who"><div class="letter" style="background:var(--teal)">B</div><h3>Reloj en S/4</h3></div><span class="status st-ok"><i></i>Lista</span><p>La aprobación automática ya se probó. Sigue el diseño detallado del motor.</p></div>
-    <div class="milestone c"><div class="who"><div class="letter" style="background:var(--violet)">C</div><h3>SAP Build</h3></div><span class="status st-wait"><i></i>1 prueba</span><p>Probar que un proceso programado en Build encienda el motor.</p></div>
-    <div class="milestone d"><div class="who"><div class="letter" style="background:var(--blue)">D</div><h3>Agente Joule</h3></div><span class="status st-wait"><i></i>Habilitación</span><p>Pedir al administrador de la nube que active Joule Studio y luego probar el agente.</p></div>
-    <div class="milestone a"><div class="who"><div class="letter" style="background:var(--slate)">A</div><h3>El flujo decide</h3></div><span class="status st-block"><i></i>En espera</span><p>Depende de que el otro equipo termine sus pruebas del flujo de aprobación.</p></div>
-  </div>
-</section>
 
-<footer>Octubre 2026 · Documento de análisis para el equipo funcional. El detalle técnico está en el comparativo de opciones.</footer>
+<footer>Octubre 2026 · Documento de análisis para el equipo funcional. </footer>
 </div>
 </body></html>
