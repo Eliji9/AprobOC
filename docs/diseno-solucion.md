@@ -29,23 +29,26 @@ Post-liberación en ECC (**fuera de alcance por ahora**): `ZMM_CREATE_COUPA_OC` 
 - No se usan BAdIs del Flexible Workflow.
 - La configuración del Flexible Workflow está congelada por pruebas integrales, sin fecha de fin.
 
-## 3. Opción A – Condiciones estándar del Flexible Workflow (no implementable hoy)
+## 3. Opción A – Flexible Workflow con condiciones por BAdI (no implementable hoy)
 
-1. En *Manage Workflows for Purchase Orders* se definen pasos con la condición estándar de monto
-   neto de la OC, por moneda del documento.
-2. Si ningún paso aplica, el workflow libera la OC automáticamente.
-3. Los umbrales en moneda local se revisan periódicamente por la tasa de cambio.
+Las condiciones necesarias (monto en USD y campos adicionales) no existen como condiciones
+estándar; se agregan con los BAdIs `SWF_WORKFLOW_CONDITION_DEF` / `SWF_WORKFLOW_CONDITION_EVAL`.
 
-- **Objetos:** ninguno; solo configuración (administrador del workflow).
-- **Clean core:** 100 % estándar.
-- **Limitación:** no evalúa en USD; requiere umbrales por moneda.
-- **Bloqueo:** configuración congelada por pruebas integrales.
+1. El otro equipo implementa los BAdIs; la evaluación del monto USD puede llamar a una clase de reglas.
+2. En *Manage Workflows for Purchase Orders* se configuran los pasos por nivel con esas condiciones.
+3. Si ningún paso aplica, el workflow libera la OC automáticamente, sin aprobador técnico.
+
+- **Clean core:** ≈ 95 % (BAdIs released + configuración estándar).
+- **Bloqueo:** BAdIs a cargo de otro equipo y configuración congelada por pruebas integrales.
 
 ## 4. Opción B – Application Job aprobador (recomendada hoy)
 
 1. El Flexible Workflow genera la tarea `TS00800531` según la configuración actual (sin cambios).
 2. Un Application Job (cada 1–5 min, usuario genérico con perfil de administrador de workflow)
    busca las tareas abiertas y calcula el total en USD con la clase de reglas.
+   Búsqueda de pendientes (definida 15-10-2026): primero las OC "En proc. autorización" con la CDS
+   released `I_PurchaseOrderAPI01` (Tier 1, incluye monto y moneda); solo para las que cumplen la regla,
+   el wrapper Tier 2 busca su work item `TS00800531` abierto y el nivel (tareas completadas + 1).
 3. Si cumple el rango del nivel, el wrapper Tier 2 reenvía la tarea al usuario genérico (si no es
    agente) y la aprueba; si no cumple, queda manual.
 4. Registra OC, nivel, monto USD y rango en el Application Log (`CL_BALI_LOG`).

@@ -19,18 +19,18 @@ rangos de monto.
 MIGO) quedan fuera de alcance por ahora.
 
 **Restricciones:**
-- No se usan BAdIs del Flexible Workflow.
+- Los BAdIs del Flexible Workflow los gestiona otro equipo; solo la opción A depende de ellos.
 - La configuración del Flexible Workflow está congelada por pruebas integrales, sin fecha de fin.
 
-## Opciones evaluadas (sin BAdIs)
+## Opciones evaluadas
 
-| Criterio | A · Config estándar WF | B · Job S/4 | C · Build + tabla de decisión | D · Agente Joule |
+| Criterio | A · Flexible Workflow con BAdIs | B · Job S/4 | C · Build + tabla de decisión | D · Agente Joule |
 |---|---|---|---|---|
 | Disponible hoy | No (config congelada) | Sí | Sí | Sí, con licencias |
-| Toca el workflow | Configuración | No | No | No |
-| Clean core | 100 % estándar | ≈ 80 % | ≈ 85 % | ≈ 85 % |
+| Toca el workflow | BAdIs + configuración | No | No | No |
+| Clean core | ≈ 95 % | ≈ 80 % | ≈ 85 % | ≈ 85 % |
 | Acceso a la tarea | No aplica | Wrapper (reenvía y decide) | Servicio OData + wrapper de B | Servicio OData + wrapper de B |
-| Regla en USD | No, por moneda | Sí | Sí | Sí |
+| Regla en USD | Sí (vía BAdI) | Sí | Sí | Sí |
 | Latencia | Inmediata | 1–5 min | 5–15 min | 5–15 min |
 | Costo adicional | Ninguno | Ninguno | Ninguno (licencia disponible) | Licencias + AI Units |
 | Viabilidad | Alta, bloqueada | Alta | Media | Media–baja |
