@@ -126,7 +126,47 @@ del workflow está congelada.
    umbrales por moneda; se retiran el job y el wrapper.
 3. **Alternativa:** opción C si el negocio quiere mantener los rangos en BTP y tiene licencia de Build.
 
-## 9. Prueba de concepto de la decisión sobre `TS00800531` (DS4)
+## 9. Resultado de la prueba de concepto (DS4, 15-10-2026)
+
+**Se puede aprobar.** Las OC 1100000502 (175,15 USD) y 1100000503 (19.750,00 USD) quedaron
+**Autorizado** por un usuario que no era el aprobador original:
+
+1. `SAP_WAPI_FORWARD_WORKITEM` reenvía el work item al usuario que ejecuta (RC 0, estado SELECTED).
+2. `TASKPROCESSING` → `POST Decision` con `SAP__Origin='LOCAL_TGW'`, `DecisionKey='0001'` (Autorizar,
+   POSITIVE). `0002` = Rechazar (NEGATIVE).
+3. Work item → finalizado; OC → Autorizado, aprobador = usuario que ejecutó.
+
+Hallazgos:
+
+- `SAP_WAPI_DECISION_READ/COMPLETE` **no sirven**: la tarea `TS00800531` no es una decisión clásica
+  ("no es decisión del usuario").
+- `TASKPROCESSING` sin reenvío devuelve `/IWWRK/WF_ODC/004 – No tiene acceso al elemento`: solo
+  opera tareas donde el usuario es agente.
+- El ID correcto es el del **paso de diálogo** (`TS00800531`), no el del workflow padre (`WS00800238`).
+- Las opciones de decisión del Flexible Workflow se configuran por escenario (`WS00800238`), no por tarea.
+
+Cadena de llamadas de la aprobación (pila del debugger):
+
+| Nivel | Objeto | Rol |
+|---|---|---|
+| 30–31 | `/IWPGW/CL_TGW_EDP_TASK` → `ACTION_DECISION` | Servicio `TASKPROCESSING` |
+| 33 | **`/IWWRK/WF_TGW_TASK_DET_ACTION`** | Punto de entrada en el backend |
+| 34 | `/IWWRK/CL_TGW_RFC_HANDLER` → `WF_TGW_TASK_DET_ACTION` | Handler |
+| 35–37 | `/IWWRK/CL_WF_UPDATE_WORKITEM` → `EXECUTE_OPERATION` / `OPERATION_DECISION` / `CUST_BADI_BEFORE_UPDATE` | Framework de decisión |
+| 38 | `CL_MM_PUR_PO_APPR_ACTIONS_BADI` → `BEFORE_UPDATE` | Lógica estándar MM de aprobación de OC |
+| 39 | `CL_MM_PUR_WF_OBJECT` → `SET_WORKITEM_EXECUTED` | MM registra el resultado |
+| 40 | `SAP_WAPI_WORKITEM_COMPLETE` | Cierre técnico |
+
+Firma de `/IWWRK/WF_TGW_TASK_DET_ACTION`: `IV_INSTANCE_ID` (SWW_WIID), `IV_ACTION_NAME` (STRING),
+`IV_DECISION_KEY` (SWR_DECIKEY), `IV_FORWARD_USR_ID` (SYUNAME), `IV_LANGUAGE` (SPRAS),
+`IV_COMMENTS` (STRING), `IS_RESUBMISSION`, `IV_REASON_CODE`; salida `EV_ERROR_FLAG`, `ET_RETURN`
+(BAPIRETTAB), `ES_WI_ROOT_DETAIL`, `ET_RETURN_USERS`.
+
+**Implicación para el wrapper (opción B):** reenviar con `SAP_WAPI_FORWARD_WORKITEM` y aprobar con
+`/IWWRK/WF_TGW_TASK_DET_ACTION`, que ejecuta toda la lógica estándar de MM. Pendiente PoC 2:
+validar la llamada directa (programa `poc/ZTEST_WF_TGW_APPROVE.abap`) y el valor de `IV_ACTION_NAME`.
+
+## 10. Procedimiento de la prueba de concepto (DS4)
 
 1. Crear 2 OC que entren a aprobación; ubicar los work items en SWI1 (estado READY).
 2. **Prueba A (referencia):** `/IWFND/GW_CLIENT` con el usuario genérico →
