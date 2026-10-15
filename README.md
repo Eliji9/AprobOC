@@ -42,7 +42,7 @@ si el negocio quiere mantener los rangos en BTP y ya tiene licencia de Build.
 ## Estado
 
 - [x] Prueba de concepto 1: aprobación vía My Inbox validada (OC 1100000502 y 1100000503 autorizadas) — B, C, D
-- [ ] Prueba de concepto 2: aprobar llamando `/IWWRK/WF_TGW_TASK_DET_ACTION` directo (`poc/ZTEST_WF_TGW_APPROVE.abap`) — B
+- [x] Prueba de concepto 2: aprobación por programa validada (OC 1100000508) llamando `/IWWRK/WF_TGW_TASK_DET_ACTION` directo (`poc/ZTEST_WF_TGW_APPROVE.abap`) — B
 - [ ] Mapeo de rangos de `ZMM_COD_PED` a niveles del Flexible Workflow (negocio) — todas
 - [ ] Frecuencia mínima del Application Job y autorizaciones del usuario genérico — B
 - [ ] Licencia y subaccount de SAP Build Process Automation — C, D

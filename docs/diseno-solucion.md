@@ -167,6 +167,11 @@ Firma de `/IWWRK/WF_TGW_TASK_DET_ACTION`: `IV_INSTANCE_ID` (SWW_WIID), `IV_ACTIO
 `IV_COMMENTS` (STRING), `IS_RESUBMISSION`, `IV_REASON_CODE`; salida `EV_ERROR_FLAG`, `ET_RETURN`
 (BAPIRETTAB), `ES_WI_ROOT_DETAIL`, `ET_RETURN_USERS`.
 
+**Prueba de concepto 2 (validada, 15-10-2026):** el programa `poc/ZTEST_WF_TGW_APPROVE.abap` aprobó
+el work item 47037 (OC 1100000508, 19.750,00 USD) sin HTTP ni My Inbox:
+`SAP_WAPI_FORWARD_WORKITEM` (RC 0) → `/IWWRK/WF_TGW_TASK_DET_ACTION` con `IV_ACTION_NAME = 'Decision'`,
+`IV_DECISION_KEY = '0001'` → `COMMIT WORK AND WAIT`. Resultado: work item COMPLETED y OC **Autorizado**.
+
 **Implicación para el wrapper (opción B):** reenviar con `SAP_WAPI_FORWARD_WORKITEM` y aprobar con
 `/IWWRK/WF_TGW_TASK_DET_ACTION`, que ejecuta toda la lógica estándar de MM. Pendiente PoC 2:
 validar la llamada directa (programa `poc/ZTEST_WF_TGW_APPROVE.abap`) con `IV_ACTION_NAME = 'Decision'` (valor capturado en el debugger, sensible a mayúsculas; `EXEC` devuelve "La operación no existe").
