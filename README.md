@@ -24,15 +24,22 @@ MIGO) quedan fuera de alcance por ahora.
 
 ## Opciones evaluadas
 
-| Criterio | A · Flexible Workflow con BAdIs | B · Job S/4 | C · Build + tabla de decisión | D · Agente Joule |
+**Núcleo común en S/4 (B, C y D):** toda la lógica del job vive en una clase de S/4
+(`ZCL_MM_PO_APPR_PROCESS`): busca las OC en aprobación con `I_PurchaseOrderAPI01`, evalúa la
+tabla de reglas `ZMM_PO_APPR_RULE` y aprueba con el wrapper Tier 2 `ZCL_MM_WF_DECISION_API`
+(búsqueda de work item y nivel, reenvío a `ZJOBPROCESOS` y decisión). En C y D se expone con
+un servicio OData. Clean core del núcleo: Tier 1 + 1 wrapper Tier 2, 0 % Tier 3.
+
+| Criterio | A · BAdIs del workflow | B · Job S/4 | C · Build | D · Agente Joule |
 |---|---|---|---|---|
-| Disponible hoy | No (config congelada) | Sí | Sí | Sí, con licencias |
+| Disponible hoy | No (bloqueada) | Sí | Sí | Sí, con Joule |
 | Toca el workflow | BAdIs + configuración | No | No | No |
-| Clean core | 100 % | ≈ 80 % | ≈ 85 % | ≈ 85 % |
-| Acceso a la tarea | No aplica | Wrapper (reenvía y decide) | Servicio OData + wrapper de B | Servicio OData + wrapper de B |
-| Regla de monto | Sí (vía BAdI) | Sí | Sí | Sí |
-| Latencia | Inmediata | 1–5 min | 5–15 min | 5–15 min |
-| Costo adicional | Ninguno | Ninguno | Ninguno (licencia disponible) | Licencias + AI Units |
+| Núcleo en S/4 | BAdI + regla | Común | Común + servicio | Común + servicio |
+| Clean core en S/4 | 100 % Tier 1 + estándar | Tier 1 + 1 wrapper T2 | Igual que B | Igual que B |
+| Disparador | El workflow | Application Job | Proceso de Build | Agente Joule |
+| Componentes adicionales | Ninguno | Ninguno | Proceso + Action + destino | Agente + proceso + destino |
+| Latencia | Inmediata | Frecuencia del job | Disparador + BTP → S/4 | Como C + agente |
+| Costo adicional | Ninguno | Ninguno | Ninguno | AI Units por corrida |
 | Viabilidad | Alta, bloqueada | Alta | Media | Media–baja |
 
 ## Estado
@@ -44,8 +51,8 @@ productivos; los programas de `poc/` son desechables ($TMP, solo DS4).
 
 | ID | Opción | Prueba | Estado |
 |---|---|---|---|
-| C2 | C, D | Servicio OData que expone lo validado en B (listar + aprobar) | Cubierta por B |
-| C3 | C, D | Proceso programado en Build: frecuencia, tabla de decisión y acción con CSRF | Pendiente |
+| C2 | C, D | Servicio OData que expone la clase del núcleo | Cubierta por B |
+| C3 | C, D | Proceso programado en Build que llama a "procesar pendientes" | Pendiente |
 | D2 | D | Joule Studio y agente con 3 skills | Pendiente |
 | D3 | D | Disparo desatendido desde proceso programado | Pendiente |
 | D4 | D | Medir pasos por corrida y por OC (AI Units) | Pendiente |
