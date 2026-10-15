@@ -92,9 +92,10 @@ START-OF-SELECTION.
   ENDIF.
 
   "--- 3. Aprobar con la misma función que usa My Inbox ------------------
-  " Operación de decisión: /IWWRK/CL_WF_UPDATE_WORKITEM->EXECUTE_OPERATION
-  " llama a OPERATION_DECISION cuando la operación es WF_OPERATION-EXECUTE.
-  DATA(lv_action) = CONV string( /iwwrk/if_wf_constants_gw=>wf_operation-execute ).
+  " Valor capturado en el debugger (llamada desde TASKPROCESSING / My Inbox):
+  " IV_ACTION_NAME = 'Decision' (sensible a mayúsculas). La función lo traduce
+  " internamente a WF_OPERATION-EXECUTE ('EXEC').
+  DATA(lv_action) = `Decision`.
   WRITE: / 'Operación :', lv_action.
 
   CALL FUNCTION '/IWWRK/WF_TGW_TASK_DET_ACTION'

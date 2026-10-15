@@ -169,7 +169,7 @@ Firma de `/IWWRK/WF_TGW_TASK_DET_ACTION`: `IV_INSTANCE_ID` (SWW_WIID), `IV_ACTIO
 
 **Implicación para el wrapper (opción B):** reenviar con `SAP_WAPI_FORWARD_WORKITEM` y aprobar con
 `/IWWRK/WF_TGW_TASK_DET_ACTION`, que ejecuta toda la lógica estándar de MM. Pendiente PoC 2:
-validar la llamada directa (programa `poc/ZTEST_WF_TGW_APPROVE.abap`) con `IV_ACTION_NAME = /IWWRK/IF_WF_CONSTANTS_GW=>WF_OPERATION-EXECUTE` (operación de decisión).
+validar la llamada directa (programa `poc/ZTEST_WF_TGW_APPROVE.abap`) con `IV_ACTION_NAME = 'Decision'` (valor capturado en el debugger, sensible a mayúsculas; `EXEC` devuelve "La operación no existe").
 
 ## 10. Procedimiento de la prueba de concepto (DS4)
 
