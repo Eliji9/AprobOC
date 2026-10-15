@@ -51,7 +51,6 @@ estándar; se agregan con los BAdIs `SWF_WORKFLOW_CONDITION_DEF` / `SWF_WORKFLOW
    el wrapper Tier 2 busca su work item `TS00800531` abierto y el nivel (tareas completadas + 1).
 3. Si cumple el rango del nivel, el wrapper Tier 2 reenvía la tarea al usuario genérico (si no es
    agente) y la aprueba; si no cumple, queda manual.
-4. Registra OC, nivel, monto USD y rango en el Application Log (`CL_BALI_LOG`).
 
 | Objeto | Tipo | Tier |
 |---|---|---|

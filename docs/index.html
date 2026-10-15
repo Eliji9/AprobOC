@@ -306,7 +306,6 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
         <li><div><span class="where">S/4 · Application Job, cada 1–5 min</span><span class="what">Busca las OC "En proc. autorización" con la CDS released <code>I_PurchaseOrderAPI01</code> y calcula el total con la clase de reglas.</span></div></li>
         <li><div><span class="where">S/4 · Wrapper Tier 2</span><span class="what">Solo para las OC que cumplen la regla, busca su work item <code>TS00800531</code> abierto y el nivel (tareas completadas + 1).</span></div></li>
         <li><div><span class="where">S/4 · Wrapper Tier 2</span><span class="what">Si cumple el rango del nivel, reenvía la tarea a <code>ZJOBPROCESOS</code> y la aprueba con <code>/IWWRK/WF_TGW_TASK_DET_ACTION</code> (validado en PoC 2). Si no cumple, queda para aprobación manual.</span></div></li>
-        <li><div><span class="where">S/4 · Application Log</span><span class="what">Registra OC, nivel, monto y rango aplicado.</span></div></li>
       </ol>
     </div>
     <div class="sec">
@@ -351,7 +350,6 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <span class="pill alta">Alta · mecanismo validado</span>
       <ul>
         <li>Aprobación por programa validada en DS4 (PoC 1 y 2)</li>
-        <li>Validar con Basis la frecuencia mínima del job y las autorizaciones del usuario genérico</li>
       </ul>
     </div>
   </section>
