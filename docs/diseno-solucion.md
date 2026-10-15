@@ -144,6 +144,11 @@ Hallazgos:
   opera tareas donde el usuario es agente.
 - El ID correcto es el del **paso de diálogo** (`TS00800531`), no el del workflow padre (`WS00800238`).
 - Las opciones de decisión del Flexible Workflow se configuran por escenario (`WS00800238`), no por tarea.
+- **Agentes excluidos:** el reenvío falla con "El responsable US … está excluido del tratamiento del
+  work item" (RC 2) cuando el usuario está excluido de la tarea; por ejemplo, si es el creador de la OC
+  (control de segregación de funciones del workflow). El reenvío no salta esta exclusión. Implicación:
+  el usuario genérico del job **nunca** debe crear OC, y el job debe registrar esas OC como excepción
+  y dejarlas para aprobación manual.
 
 Cadena de llamadas de la aprobación (pila del debugger):
 
