@@ -59,6 +59,15 @@ Post-liberación en ECC (**fuera de alcance por ahora**): `ZMM_CREATE_COUPA_OC` 
 
 Fuentes de datos released: `I_PurchaseOrderAPI01`, `I_PurchaseOrderItemAPI01`.
 
+Definiciones (15-10-2026):
+
+- **Usuario del job:** `ZJOBPROCESOS` (en calidad), con perfil de administrador de workflow. Nunca crea OC.
+- **Multinivel:** habrá OC con más de un nivel de aprobación. El nivel de cada tarea pendiente se
+  determina como *número de tareas `TS00800531` ya completadas en la misma instancia del workflow
+  (`WS00800238`) + 1*. Si la OC cambia, el workflow se reinicia (nueva instancia) y el conteo vuelve a 1.
+- **Ciclo por nivel:** cada corrida aprueba solo el nivel pendiente si el total USD está en el rango de
+  ese nivel; el siguiente nivel lo toma la corrida siguiente (equivalente al `WHILE` de ECC).
+
 ## 5. Opción C – SAP Build Process Automation con tabla de decisión
 
 1. Proceso programado en Build (cada 5–15 min) lee tareas pendientes con `TASKPROCESSING`.
