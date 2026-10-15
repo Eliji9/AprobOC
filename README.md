@@ -4,7 +4,8 @@ Migración a **S/4HANA Cloud Private Edition** (ABAP Cloud / Clean Core) del job
 `ZMM_APR_PED_BOT`, que libera automáticamente las órdenes de compra pendientes según
 rangos de monto.
 
-- Comparativo visual de opciones: [`docs/index.html`](docs/index.html)
+- Comparativo técnico de opciones: [`docs/index.html`](docs/index.html)
+- Presentación visual para el equipo funcional: [`docs/presentacion.html`](docs/presentacion.html)
 - Diseño de la solución: [`docs/diseno-solucion.md`](docs/diseno-solucion.md)
 
 ## Contexto

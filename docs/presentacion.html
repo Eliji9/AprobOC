@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aprobación Automática de Pedidos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap">
+<style>
+/* Layout: portada → hoy vs. mañana → lo comprobado → motor común (diagrama) → 4 opciones → semáforo comparativo → próximos pasos */
+:root{
+  --bg:#f4f7fb; --surface:#ffffff; --fg:#13233d; --muted:#5a6880; --line:#dfe6ef;
+  --blue:#1663c7; --blue-soft:#e5effc; --teal:#0d8a80; --teal-soft:#e0f3f1;
+  --slate:#566a88; --slate-soft:#e9edf3; --violet:#6551c4; --violet-soft:#eeebfa;
+  --amber:#a86400; --amber-soft:#fcf1dd; --green:#1f7a43; --green-soft:#e3f3e9; --red:#b3392f; --red-soft:#fbe8e6;
+  --dot-off:#d6dde8;
+  --display:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0c1422; --surface:#142035; --fg:#e6edf6; --muted:#9eadc2; --line:#263552;
+  --blue:#6aa9f4; --blue-soft:#17305a; --teal:#4dcabd; --teal-soft:#0f3a37;
+  --slate:#a8b8d0; --slate-soft:#1e2b42; --violet:#a596f2; --violet-soft:#272150;
+  --amber:#f2b85a; --amber-soft:#3c2b10; --green:#6dd394; --green-soft:#143423; --red:#f18a80; --red-soft:#3f1b18;
+  --dot-off:#2c3a55; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1422; --surface:#142035; --fg:#e6edf6; --muted:#9eadc2; --line:#263552;
+  --blue:#6aa9f4; --blue-soft:#17305a; --teal:#4dcabd; --teal-soft:#0f3a37;
+  --slate:#a8b8d0; --slate-soft:#1e2b42; --violet:#a596f2; --violet-soft:#272150;
+  --amber:#f2b85a; --amber-soft:#3c2b10; --green:#6dd394; --green-soft:#143423; --red:#f18a80; --red-soft:#3f1b18;
+  --dot-off:#2c3a55; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55;padding:0 16px}
+.wrap{max-width:1180px;margin:0 auto;padding-block:32px 64px;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:clamp(1.4rem,3vw,1.9rem);font-weight:600}
+h3{font-size:1.15rem;font-weight:600}
+p{margin:0}
+.kicker{font-family:var(--display);font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+.sec-head{display:flex;flex-direction:column;gap:6px;max-width:70ch}
+.sec-head p{color:var(--muted);font-size:1.05rem}
+svg.i{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* Portada */
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:center}
+@media (max-width:860px){.hero{grid-template-columns:1fr}}
+.hero p.lead{font-size:1.2rem;color:var(--muted);max-width:52ch;margin-top:14px}
+.hero-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:14px}
+.goal{display:flex;gap:14px;align-items:flex-start}
+.goal .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex:none}
+.goal b{font-family:var(--display);font-size:1.05rem;display:block}
+.goal span{color:var(--muted);font-size:.95rem}
+
+/* Hoy vs mañana */
+.versus{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:stretch}
+@media (max-width:860px){.versus{grid-template-columns:1fr}.vs-arrow{transform:rotate(90deg);justify-self:center}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.panel .tag{align-self:flex-start;font-family:var(--display);font-weight:600;font-size:.8rem;padding:4px 12px;border-radius:999px}
+.vs-arrow{align-self:center;color:var(--muted)}
+.chain{display:flex;flex-direction:column;gap:10px}
+.link{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--bg)}
+.link .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:600;font-size:.9rem;flex:none}
+.link.out{opacity:.5}
+.link small{display:block;color:var(--muted);font-size:.85rem}
+
+/* Comprobado */
+.proof{background:var(--green-soft);border-radius:20px;padding:26px;display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center}
+@media (max-width:860px){.proof{grid-template-columns:1fr}}
+.proof .big-check{width:72px;height:72px;border-radius:50%;background:var(--green);color:var(--surface);display:grid;place-items:center}
+.proof .big-check svg{width:40px;height:40px;stroke-width:2.6}
+.proof h2{color:var(--green)}
+.proof p{color:var(--fg);margin-top:6px;max-width:60ch}
+.pos{display:flex;gap:10px;flex-wrap:wrap}
+.po{background:var(--surface);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;align-items:center;min-width:110px}
+.po b{font-family:var(--display);font-variant-numeric:tabular-nums}
+.po span{font-size:.8rem;color:var(--green);font-weight:600}
+
+/* Motor común */
+.engine{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px;display:flex;flex-direction:column;gap:22px}
+.engine-diagram{overflow-x:auto}
+.engine-diagram svg{display:block;min-width:720px;width:100%;height:auto}
+.eng-note{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.eng-note{grid-template-columns:1fr}}
+.eng-note div{background:var(--bg);border-radius:12px;padding:12px 14px;font-size:.95rem}
+.eng-note b{font-family:var(--display);display:block;margin-bottom:2px}
+
+/* Opciones */
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+@media (max-width:860px){.opts{grid-template-columns:1fr}}
+.opt{background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;--c:var(--teal);--cs:var(--teal-soft)}
+.opt.a{--c:var(--slate);--cs:var(--slate-soft)}
+.opt.b{--c:var(--teal);--cs:var(--teal-soft)}
+.opt.c{--c:var(--violet);--cs:var(--violet-soft)}
+.opt.d{--c:var(--blue);--cs:var(--blue-soft)}
+.opt-top{background:var(--cs);padding:20px 22px;display:flex;gap:16px;align-items:center}
+.letter{width:54px;height:54px;border-radius:14px;background:var(--c);color:var(--surface);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:1.6rem;flex:none}
+.opt-top h3{font-size:1.25rem}
+.opt-top p{color:var(--muted);font-size:.95rem}
+.opt-body{padding:20px 22px;display:flex;flex-direction:column;gap:16px;flex:1}
+.status{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:.9rem;padding:5px 12px;border-radius:999px}
+.status i{width:9px;height:9px;border-radius:50%;background:currentColor;display:inline-block}
+.st-ok{background:var(--green-soft);color:var(--green)}
+.st-wait{background:var(--amber-soft);color:var(--amber)}
+.st-block{background:var(--red-soft);color:var(--red)}
+.steps{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.step{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;flex:1;min-width:90px}
+.step .bub{width:52px;height:52px;border-radius:50%;background:var(--cs);color:var(--c);display:grid;place-items:center}
+.step span{font-size:.85rem;color:var(--muted);line-height:1.3}
+.step-arr{color:var(--dot-off);flex:none}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:520px){.pc{grid-template-columns:1fr}}
+.pc ul{margin:6px 0 0;padding-left:18px;font-size:.93rem;display:flex;flex-direction:column;gap:4px}
+.pc .lab{font-family:var(--display);font-weight:600;font-size:.85rem}
+.pc .good .lab{color:var(--green)} .pc .care .lab{color:var(--amber)}
+
+/* Semáforo */
+.matrix{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px;overflow-x:auto}
+.matrix table{border-collapse:collapse;width:100%;min-width:620px}
+.matrix th,.matrix td{padding:14px 10px;text-align:center;border-bottom:1px solid var(--line)}
+.matrix th{font-family:var(--display);font-weight:600}
+.matrix th .letter{width:38px;height:38px;font-size:1.1rem;margin:0 auto 4px;border-radius:10px}
+.matrix th small{display:block;font-family:var(--body);font-weight:500;color:var(--muted);font-size:.8rem}
+.matrix td:first-child{text-align:left;font-weight:600}
+.matrix td:first-child small{display:block;font-weight:400;color:var(--muted);font-size:.85rem}
+.matrix tr:last-child td{border-bottom:0}
+.dots{display:inline-flex;gap:5px}
+.dots i{width:14px;height:14px;border-radius:50%;background:var(--dot-off);display:inline-block}
+.dots.v3 i{background:var(--green)} .dots.v2 i:nth-child(-n+2){background:var(--amber)} .dots.v1 i:first-child{background:var(--red)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:.88rem;margin-top:12px}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.th-a .letter{background:var(--slate)} .th-b .letter{background:var(--teal)} .th-c .letter{background:var(--violet)} .th-d .letter{background:var(--blue)}
+
+/* Próximos pasos */
+.road{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media (max-width:960px){.road{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.road{grid-template-columns:1fr}}
+.milestone{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;--c:var(--teal)}
+.milestone.a{--c:var(--slate)} .milestone.c{--c:var(--violet)} .milestone.d{--c:var(--blue)}
+.milestone .who{display:flex;align-items:center;gap:10px}
+.milestone .who .letter{width:34px;height:34px;font-size:1rem;border-radius:9px}
+.milestone p{font-size:.95rem;color:var(--muted)}
+footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:16px}
+</style>
+
+</head><body>
+<div class="wrap">
+
+<!-- Portada -->
+<section class="hero">
+  <div>
+    <span class="kicker">Migración a S/4HANA · Compras</span>
+    <h1>Aprobación automática de órdenes de compra</h1>
+    <p class="lead">Hoy un programa aprueba solo las órdenes de compra que cumplen una regla de monto. Al pasar a S/4HANA necesitamos que eso siga pasando, sin intervención de nadie y sin tocar el flujo de aprobación que otro equipo está probando.</p>
+  </div>
+  <div class="hero-card">
+    <div class="goal"><div class="ic" style="background:var(--teal-soft);color:var(--teal)"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div><b>Aprobar solo</b><span>Las órdenes que cumplen la regla de monto se aprueban sin que nadie entre al sistema.</span></div></div>
+    <div class="goal"><div class="ic" style="background:var(--blue-soft);color:var(--blue)"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><b>Más rápido que hoy</b><span>Hoy se revisa dos veces al día; la meta es revisar cada pocos minutos.</span></div></div>
+    <div class="goal"><div class="ic" style="background:var(--violet-soft);color:var(--violet)"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></div><div><b>Sistema limpio</b><span>Usar herramientas estándar de SAP para que las actualizaciones no rompan nada.</span></div></div>
+  </div>
+</section>
+
+<!-- Hoy vs mañana -->
+<section style="display:flex;flex-direction:column;gap:18px">
+  <div class="sec-head"><span class="kicker">El cambio</span><h2>Cómo funciona hoy y qué cambia</h2></div>
+  <div class="versus">
+    <div class="panel">
+      <span class="tag" style="background:var(--slate-soft);color:var(--slate)">HOY · ECC</span>
+      <div class="chain">
+        <div class="link"><span class="n" style="background:var(--slate-soft);color:var(--slate)">1</span><div>Un programa se ejecuta <b>dos veces al día</b></div></div>
+        <div class="link"><span class="n" style="background:var(--slate-soft);color:var(--slate)">2</span><div>Revisa las órdenes pendientes y su monto</div></div>
+        <div class="link"><span class="n" style="background:var(--slate-soft);color:var(--slate)">3</span><div>Si el monto está en el rango, <b>libera la orden</b></div></div>
+        <div class="link out"><span class="n" style="background:var(--slate-soft);color:var(--slate)">4</span><div>Luego anticipo, entrada de mercancía y envío a Coupa<small>Fuera del alcance por ahora</small></div></div>
+      </div>
+    </div>
+    <svg class="i vs-arrow" viewBox="0 0 24 24" style="width:40px;height:40px"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    <div class="panel">
+      <span class="tag" style="background:var(--teal-soft);color:var(--teal)">MAÑANA · S/4HANA</span>
+      <div class="chain">
+        <div class="link"><span class="n" style="background:var(--teal-soft);color:var(--teal)">1</span><div>La orden entra a un <b>flujo de aprobación</b> nuevo</div></div>
+        <div class="link"><span class="n" style="background:var(--teal-soft);color:var(--teal)">2</span><div>Cada nivel genera una <b>tarea</b> para un aprobador</div></div>
+        <div class="link"><span class="n" style="background:var(--teal-soft);color:var(--teal)">3</span><div>El programa de antes <b>ya no sirve</b>: aprueba de otra forma</div></div>
+        <div class="link"><span class="n" style="background:var(--teal-soft);color:var(--teal)">4</span><div>Necesitamos que alguien <b>apruebe esas tareas</b> automáticamente</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Comprobado -->
+<section class="proof">
+  <div class="big-check"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+  <div>
+    <h2>Ya comprobamos que se puede</h2>
+    <p>En el sistema de pruebas, un programa aprobó órdenes de compra de forma automática usando la misma lógica que usa la bandeja de aprobación de los usuarios. La orden queda autorizada igual que si la hubiera aprobado una persona.</p>
+  </div>
+  <div class="pos">
+    <div class="po"><b>1100000502</b><span>Autorizada</span></div>
+    <div class="po"><b>1100000503</b><span>Autorizada</span></div>
+    <div class="po"><b>1100000508</b><span>Autorizada</span></div>
+  </div>
+</section>
+
+<!-- Motor común -->
+<section class="engine">
+  <div class="sec-head"><span class="kicker">La idea central</span><h2>Un solo motor, varias formas de encenderlo</h2><p>Toda la lógica vive en un único lugar dentro de S/4HANA. Las opciones B, C y D usan ese mismo motor; lo único que cambia es quién lo pone en marcha.</p></div>
+  <div class="engine-diagram" role="img" aria-label="Tres disparadores (job en S/4, proceso en Build y agente Joule) encienden el mismo motor en S/4HANA, que busca órdenes, revisa la regla y aprueba.">
+    <svg viewBox="0 0 960 330">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
+      <!-- triggers -->
+      <g font-family="Outfit, sans-serif" font-size="15" font-weight="600">
+        <rect x="10" y="20" width="220" height="70" rx="14" fill="var(--teal-soft)"/>
+        <rect x="22" y="35" width="40" height="40" rx="10" fill="var(--teal)"/><text x="42" y="61" text-anchor="middle" fill="var(--surface)" font-size="20">B</text>
+        <text x="74" y="51" fill="var(--fg)">Reloj de S/4HANA</text><text x="74" y="72" fill="var(--muted)" font-family="Source Sans 3, sans-serif" font-weight="400" font-size="13">Un job cada pocos minutos</text>
+
+        <rect x="10" y="130" width="220" height="70" rx="14" fill="var(--violet-soft)"/>
+        <rect x="22" y="145" width="40" height="40" rx="10" fill="var(--violet)"/><text x="42" y="171" text-anchor="middle" fill="var(--surface)" font-size="20">C</text>
+        <text x="74" y="161" fill="var(--fg)">SAP Build</text><text x="74" y="182" fill="var(--muted)" font-family="Source Sans 3, sans-serif" font-weight="400" font-size="13">Un proceso programado</text>
+
+        <rect x="10" y="240" width="220" height="70" rx="14" fill="var(--blue-soft)"/>
+        <rect x="22" y="255" width="40" height="40" rx="10" fill="var(--blue)"/><text x="42" y="281" text-anchor="middle" fill="var(--surface)" font-size="20">D</text>
+        <text x="74" y="271" fill="var(--fg)">Agente Joule</text><text x="74" y="292" fill="var(--muted)" font-family="Source Sans 3, sans-serif" font-weight="400" font-size="13">Un asistente de IA</text>
+      </g>
+      <g stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)">
+        <path d="M232 55 C 290 55, 290 165, 330 165"/>
+        <path d="M232 165 L 330 165"/>
+        <path d="M232 275 C 290 275, 290 165, 330 165"/>
+      </g>
+      <!-- engine -->
+      <rect x="335" y="45" width="390" height="240" rx="20" fill="var(--surface)" stroke="var(--teal)" stroke-width="2.5"/>
+      <text x="530" y="80" text-anchor="middle" font-family="Outfit, sans-serif" font-size="18" font-weight="700" fill="var(--teal)">MOTOR EN S/4HANA</text>
+      <g font-family="Source Sans 3, sans-serif" font-size="15" fill="var(--fg)">
+        <circle cx="372" cy="122" r="16" fill="var(--teal-soft)"/><text x="372" y="127" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="600" fill="var(--teal)">1</text>
+        <text x="398" y="127">Busca las órdenes en aprobación</text>
+        <circle cx="372" cy="172" r="16" fill="var(--teal-soft)"/><text x="372" y="177" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="600" fill="var(--teal)">2</text>
+        <text x="398" y="177">Revisa si cumplen la regla de monto</text>
+        <circle cx="372" cy="222" r="16" fill="var(--teal-soft)"/><text x="372" y="227" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="600" fill="var(--teal)">3</text>
+        <text x="398" y="227">Aprueba las que cumplen</text>
+        <text x="530" y="268" text-anchor="middle" fill="var(--muted)" font-size="13">Las que no cumplen quedan para aprobación manual</text>
+      </g>
+      <path d="M727 165 L 800 165" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+      <!-- result -->
+      <circle cx="870" cy="165" r="62" fill="var(--green-soft)"/>
+      <path d="M845 165 l17 17 l32 -34" stroke="var(--green)" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="870" y="252" text-anchor="middle" font-family="Outfit, sans-serif" font-size="15" font-weight="600" fill="var(--green)">Orden autorizada</text>
+    </svg>
+  </div>
+  <div class="eng-note">
+    <div><b>Una sola regla</b>La regla de monto se mantiene en un solo lugar, sin duplicarse.</div>
+    <div><b>Mismo resultado</b>B, C y D aprueban exactamente igual; cambia el costo y la operación.</div>
+    <div><b>La opción A es distinta</b>No usa el motor: el propio flujo de aprobación decide.</div>
+  </div>
+</section>
+
+<!-- Opciones -->
+<section style="display:flex;flex-direction:column;gap:18px">
+  <div class="sec-head"><span class="kicker">Las alternativas</span><h2>Cuatro opciones</h2></div>
+  <div class="opts">
+
+    <article class="opt a">
+      <div class="opt-top"><div class="letter">A</div><div><h3>El flujo decide solo</h3><p>Se ajusta el flujo de aprobación para que no pida aprobación cuando la orden cumple la regla.</p></div></div>
+      <div class="opt-body">
+        <span class="status st-block"><i></i>Bloqueada hoy</span>
+        <div class="steps">
+          <div class="step"><div class="bub"><svg class="i" viewBox="0 0 24 24"><path d="M14 3h7v7M10 14L21 3M21 14v7H3V3h7"/></svg></div><span>Se crea la orden</span></div>
+          <svg class="i step-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+          <div class="step"><div class="bub"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/></svg></div><span>El flujo revisa la regla</span></div>
+          <svg class="i step-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+          <div class="step"><div class="bub"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><span>Se libera al instante</span></div>
+        </div>
+        <div class="pc">
+          <div class="good"><span class="lab">A favor</span><ul><li>La más limpia</li><li>Inmediata</li><li>Nadie aprueba por la orden</li></ul></div>
+          <div class="care"><span class="lab">A tener en cuenta</span><ul><li>Depende de otro equipo</li><li>El flujo está congelado por pruebas, sin fecha</li></ul></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="opt b">
+      <div class="opt-top"><div class="letter">B</div><div><h3>Un reloj dentro de S/4HANA</h3><p>Un proceso programado en S/4HANA enciende el motor cada pocos minutos. Es el reemplazo directo de lo que existe hoy.</p></div></div>
+      <div class="opt-body">
+        <span class="status st-ok"><i></i>Lista para diseñar</span>
+        <div class="steps">
+          <div class="step"><div class="bub"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><span>Cada pocos minutos</span></div>
+          <svg class="i step-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+          <div class="step"><div class="bub"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/></svg></div><span>Se enciende el motor</span></div>
+          <svg class="i step-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+          <div class="step"><div class="bub"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><span>Órdenes aprobadas</span></div>
+        </div>
+        <div class="pc">
+          <div class="good"><span class="lab">A favor</span><ul><li>Lo más simple</li><li>Sin costo adicional</li><li>Ya se probó que funciona</li></ul></div>
+          <div class="care"><span class="lab">A tener en cuenta</span><ul><li>Aprueba un usuario técnico</li><li>Se monitorea solo en S/4HANA</li></ul></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="opt c">
+      <div class="opt-top"><div class="letter">C</div><div><h3>Un proceso en SAP Build</h3><p>Un proceso programado en la nube de SAP enciende el mismo motor a distancia.</p></div></div>
+      <div class="opt-body">
+        <span class="status st-wait"><i></i>Falta una prueba</span>
+        <div class="steps">
+          <div class="step"><div class="bub"><svg class="i" viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-8 6 6 0 0 1 11.5 1.5A3.5 3.5 0 0 1 17.5 18z"/></svg></div><span>Build programa</span></div>
+          <svg class="i step-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+          <div class="step"><div class="bub"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/></svg></div><span>Llama al motor</span></div>
+          <svg class="i step-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+          <div class="step"><div class="bub"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><span>Órdenes aprobadas</span></div>
+        </div>
+        <div class="pc">
+          <div class="good"><span class="lab">A favor</span><ul><li>Monitoreo en la nube</li><li>Licencia ya disponible</li></ul></div>
+          <div class="care"><span class="lab">A tener en cuenta</span><ul><li>Más piezas que B</li><li>Algo más lenta</li><li>Hace lo mismo que B</li></ul></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="opt d">
+      <div class="opt-top"><div class="letter">D</div><div><h3>Un agente de Joule</h3><p>Un asistente de inteligencia artificial de SAP enciende el motor. La IA no decide: la regla sigue en S/4HANA.</p></div></div>
+      <div class="opt-body">
+        <span class="status st-wait"><i></i>Esperando habilitación</span>
+        <div class="steps">
+          <div class="step"><div class="bub"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9l-4.7 1.8L12 15.5l-1.8-4.7L5.5 9l4.7-1.3z"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></div><span>Joule se activa</span></div>
+          <svg class="i step-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+          <div class="step"><div class="bub"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/></svg></div><span>Llama al motor</span></div>
+          <svg class="i step-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+          <div class="step"><div class="bub"><svg class="i" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><span>Órdenes aprobadas</span></div>
+        </div>
+        <div class="pc">
+          <div class="good"><span class="lab">A favor</span><ul><li>Abre la puerta a usar IA en casos especiales</li><li>Muestra innovación</li></ul></div>
+          <div class="care"><span class="lab">A tener en cuenta</span><ul><li>Tiene costo por uso</li><li>La más compleja</li><li>Joule Studio aún no está habilitado</li></ul></div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- Semáforo -->
+<section style="display:flex;flex-direction:column;gap:18px">
+  <div class="sec-head"><span class="kicker">De un vistazo</span><h2>Cómo se comparan</h2><p>Tres puntos verdes es lo mejor en cada criterio.</p></div>
+  <div class="matrix">
+    <table>
+      <thead><tr><th></th>
+        <th class="th-a"><div class="letter">A</div>El flujo decide<small>BAdIs del flujo</small></th>
+        <th class="th-b"><div class="letter">B</div>Reloj en S/4<small>Job en S/4HANA</small></th>
+        <th class="th-c"><div class="letter">C</div>SAP Build<small>Proceso en la nube</small></th>
+        <th class="th-d"><div class="letter">D</div>Agente Joule<small>Asistente de IA</small></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>¿Se puede hacer ya?<small>Sin esperar a otros</small></td>
+          <td><span class="dots v1" aria-label="1 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v3" aria-label="3 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v2" aria-label="2 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v1" aria-label="1 de 3"><i></i><i></i><i></i></span></td></tr>
+        <tr><td>Rapidez<small>Tiempo hasta aprobar</small></td>
+          <td><span class="dots v3" aria-label="3 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v2" aria-label="2 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v1" aria-label="1 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v1" aria-label="1 de 3"><i></i><i></i><i></i></span></td></tr>
+        <tr><td>Simplicidad<small>Piezas que mantener</small></td>
+          <td><span class="dots v3" aria-label="3 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v3" aria-label="3 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v2" aria-label="2 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v1" aria-label="1 de 3"><i></i><i></i><i></i></span></td></tr>
+        <tr><td>Costo<small>Sin pagos adicionales</small></td>
+          <td><span class="dots v3" aria-label="3 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v3" aria-label="3 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v3" aria-label="3 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v1" aria-label="1 de 3"><i></i><i></i><i></i></span></td></tr>
+        <tr><td>Sistema limpio<small>Uso de herramientas estándar</small></td>
+          <td><span class="dots v3" aria-label="3 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v2" aria-label="2 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v2" aria-label="2 de 3"><i></i><i></i><i></i></span></td>
+          <td><span class="dots v2" aria-label="2 de 3"><i></i><i></i><i></i></span></td></tr>
+      </tbody>
+    </table>
+    <div class="legend">
+      <span><span class="dots v3"><i></i><i></i><i></i></span>Muy bien</span>
+      <span><span class="dots v2"><i></i><i></i><i></i></span>Aceptable</span>
+      <span><span class="dots v1"><i></i><i></i><i></i></span>Débil</span>
+    </div>
+  </div>
+</section>
+
+<!-- Próximos pasos -->
+<section style="display:flex;flex-direction:column;gap:18px">
+  <div class="sec-head"><span class="kicker">Qué sigue</span><h2>Próximos pasos por opción</h2></div>
+  <div class="road">
+    <div class="milestone b"><div class="who"><div class="letter" style="background:var(--teal)">B</div><h3>Reloj en S/4</h3></div><span class="status st-ok"><i></i>Lista</span><p>La aprobación automática ya se probó. Sigue el diseño detallado del motor.</p></div>
+    <div class="milestone c"><div class="who"><div class="letter" style="background:var(--violet)">C</div><h3>SAP Build</h3></div><span class="status st-wait"><i></i>1 prueba</span><p>Probar que un proceso programado en Build encienda el motor.</p></div>
+    <div class="milestone d"><div class="who"><div class="letter" style="background:var(--blue)">D</div><h3>Agente Joule</h3></div><span class="status st-wait"><i></i>Habilitación</span><p>Pedir al administrador de la nube que active Joule Studio y luego probar el agente.</p></div>
+    <div class="milestone a"><div class="who"><div class="letter" style="background:var(--slate)">A</div><h3>El flujo decide</h3></div><span class="status st-block"><i></i>En espera</span><p>Depende de que el otro equipo termine sus pruebas del flujo de aprobación.</p></div>
+  </div>
+</section>
+
+<footer>Octubre 2026 · Documento de análisis para el equipo funcional. El detalle técnico está en el comparativo de opciones.</footer>
+</div>
+</body></html>
