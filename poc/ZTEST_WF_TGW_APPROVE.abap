@@ -18,7 +18,6 @@ REPORT ztest_wf_tgw_approve.
 
 PARAMETERS: p_wi     TYPE sww_wiid OBLIGATORY,
             p_key    TYPE swr_decikey DEFAULT '0001',
-            p_act    TYPE string LOWER CASE DEFAULT 'DECISION',
             p_coment TYPE string LOWER CASE DEFAULT 'Aprobacion automatica PoC',
             p_fwd    AS CHECKBOX DEFAULT 'X',
             p_test   AS CHECKBOX DEFAULT 'X'.
@@ -93,10 +92,15 @@ START-OF-SELECTION.
   ENDIF.
 
   "--- 3. Aprobar con la misma función que usa My Inbox ------------------
+  " Operación de decisión: /IWWRK/CL_WF_UPDATE_WORKITEM->EXECUTE_OPERATION
+  " llama a OPERATION_DECISION cuando la operación es WF_OPERATION-EXECUTE.
+  DATA(lv_action) = CONV string( /iwwrk/if_wf_constants_gw=>wf_operation-execute ).
+  WRITE: / 'Operación :', lv_action.
+
   CALL FUNCTION '/IWWRK/WF_TGW_TASK_DET_ACTION'
     EXPORTING
       iv_instance_id   = p_wi
-      iv_action_name   = p_act
+      iv_action_name   = lv_action
       iv_decision_key  = p_key
       iv_forward_usr_id = space
       iv_language      = sy-langu
