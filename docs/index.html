@@ -396,8 +396,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
           <li>Visibilidad y monitoreo en Build</li>
         </ul></div>
         <div class="con"><h3>Contras</h3><ul>
-          <li>Requiere licencia de Build Process Automation</li>
-          <li>Más piezas: BTP, destino, usuario técnico</li>
+                    <li>Más piezas: BTP, destino, usuario técnico</li>
           <li>Mayor latencia que el job</li>
           <li>Usuario técnico aprobando, igual que B</li>
           <li>Necesita el mismo wrapper Tier 2 de B, más el servicio OData</li>
@@ -409,7 +408,8 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <span class="pill media">Media</span>
       <ul>
         <li>Mecanismo de aprobación ya validado (el mismo de B)</li>
-        <li>Pendiente: conectividad BTP → S/4, licencia de Build y frecuencia del disparador</li>
+        <li>Conectividad BTP → S/4 y licencia de Build disponibles</li>
+        <li>Pendiente: proceso programado y frecuencia del disparador</li>
       </ul>
     </div>
   </section>
@@ -497,7 +497,7 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
   <div class="tbl-wrap"><table>
     <thead><tr><th>Criterio</th><th>A · Config estándar</th><th>B · Job S/4</th><th>C · Build + tabla</th><th>D · Agente Joule</th></tr></thead>
     <tbody>
-      <tr><td>Disponible hoy</td><td>No (configuración congelada)</td><td class="win">Sí</td><td>Sí, con licencia</td><td>Sí, con licencias</td></tr>
+      <tr><td>Disponible hoy</td><td>No (configuración congelada)</td><td class="win">Sí</td><td class="win">Sí</td><td>Sí, con licencias</td></tr>
       <tr><td>Toca el workflow</td><td>Configuración</td><td class="win">No</td><td class="win">No</td><td class="win">No</td></tr>
       <tr><td>Código propio</td><td class="win">Ninguno</td><td>4 objetos</td><td>Servicio + wrapper + BTP</td><td>Servicio + wrapper + reglas + BTP</td></tr>
       <tr><td>Clean core</td><td class="win">100 % estándar</td><td>≈ 80 %</td><td>≈ 85 %</td><td>≈ 85 %</td></tr>
@@ -506,22 +506,13 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
       <tr><td>Quién libera</td><td class="win">El workflow</td><td>Usuario genérico admin.</td><td>Usuario técnico vía BTP</td><td>Usuario técnico vía BTP</td></tr>
       <tr><td>Quién mantiene la regla</td><td>Admin. de workflow</td><td>Negocio (app de configuración)</td><td class="win">Negocio (tabla de Build)</td><td>Negocio / desarrollo</td></tr>
       <tr><td>Latencia</td><td class="win">Inmediata</td><td>1–5 min</td><td>5–15 min</td><td>5–15 min</td></tr>
-      <tr><td>Costo adicional</td><td class="win">Ninguno</td><td class="win">Ninguno</td><td>Licencia Build</td><td>Licencias + AI Units</td></tr>
-      <tr><td>Prueba de concepto</td><td>No ejecutable hoy</td><td class="win">Mecanismo validado</td><td>Aprobación validada; falta BTP</td><td>Aprobación validada; falta BTP y Joule</td></tr>
+      <tr><td>Costo adicional</td><td class="win">Ninguno</td><td class="win">Ninguno</td><td>Ninguno (licencia disponible)</td><td>Licencias + AI Units</td></tr>
+      <tr><td>Prueba de concepto</td><td>No ejecutable hoy</td><td class="win">Mecanismo validado</td><td>Aprobación validada; falta el proceso en Build</td><td>Aprobación validada; falta BTP y Joule</td></tr>
       <tr><td>Viabilidad</td><td>Alta, bloqueada</td><td class="win">Alta</td><td>Media</td><td>Media–baja</td></tr>
     </tbody>
   </table></div>
 </section>
 
-<section class="reco">
-  <h2>Recomendación</h2>
-  <p><b>Salir con la opción B</b> y dejar la A como destino cuando se libere la configuración del workflow. B es la única que hoy no toca el workflow, mantiene la regla exacta en USD y no tiene costo adicional. La tabla y la clase de reglas sirven además como referencia para definir los umbrales de la A.</p>
-  <div class="phases">
-    <div class="phase"><span class="when">AHORA</span><b>Opción B: job aprobador</b><span>Reemplazo directo del job de ECC, tras la prueba de concepto.</span></div>
-    <div class="phase"><span class="when">AL TERMINAR PRUEBAS INTEGRALES</span><b>Evaluar migrar a la opción A</b><span>Si el negocio acepta umbrales por moneda, se retiran el job y el wrapper.</span></div>
-    <div class="phase"><span class="when">ALTERNATIVA</span><b>Opción C</b><span>Si el negocio quiere mantener los rangos en BTP y ya tiene licencia de Build.</span></div>
-  </div>
-</section>
 
 <section class="pend" aria-label="Pruebas pendientes por opción">
   <h2>Pruebas de concepto pendientes por opción</h2>
@@ -529,37 +520,18 @@ footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padd
     <div class="test-card tc">
       <h3>Opción C · Build Process Automation</h3>
       <div class="tbl-wrap"><table><tbody>
-        <tr><td>C1</td><td>Conectividad: destino BTP → DS4 (Cloud Connector o conexión privada de RISE), usuario de comunicación y prueba de un GET a un servicio de S/4 desde BTP</td><td><span class="st todo">Pendiente</span></td></tr>
-        <tr><td>C2</td><td>Servicio OData de prueba en DS4: listar tareas pendientes y acción "aprobar" que reutiliza el reenvío + decisión ya validados</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>C2</td><td>Servicio OData en S/4 que expone lo validado en la opción B (listar tareas pendientes + acción "aprobar")</td><td><span class="st done">Cubierta por B</span></td></tr>
         <tr><td>C3</td><td>Proceso programado en Build: frecuencia mínima, tabla de decisión y llamada a la acción con token CSRF</td><td><span class="st todo">Pendiente</span></td></tr>
-        <tr><td>C4</td><td>Licencia y subaccount de Build Process Automation</td><td><span class="st todo">Pendiente</span></td></tr>
       </tbody></table></div>
     </div>
     <div class="test-card td">
       <h3>Opción D · Agente Joule</h3>
       <div class="tbl-wrap"><table><tbody>
-        <tr><td>D1</td><td>C1 a C4 (misma conectividad y el mismo servicio)</td><td><span class="st todo">Pendiente</span></td></tr>
+        <tr><td>D1</td><td>C2 y C3 (mismo servicio y misma orquestación desde BTP)</td><td><span class="st todo">Pendiente</span></td></tr>
         <tr><td>D2</td><td>Joule Studio disponible en el subaccount y agente con 3 skills (buscar, evaluar, aprobar)</td><td><span class="st todo">Pendiente</span></td></tr>
         <tr><td>D3</td><td>Disparo desatendido desde un proceso programado</td><td><span class="st todo">Pendiente</span></td></tr>
         <tr><td>D4</td><td>Medir pasos reales por corrida y por OC para estimar AI Units</td><td><span class="st todo">Pendiente</span></td></tr>
         <tr><td>D5</td><td>Determinismo: con la misma OC, el agente siempre decide según el servicio de reglas</td><td><span class="st todo">Pendiente</span></td></tr>
-      </tbody></table></div>
-    </div>
-    <div class="test-card ta">
-      <h3>Opción A · Configuración estándar</h3>
-      <div class="tbl-wrap"><table><tbody>
-        <tr><td>A1</td><td>Solo lectura: revisar en <i>Manage Workflows for Purchase Orders</i> las condiciones disponibles (monto neto, moneda)</td><td><span class="st todo">Pendiente</span></td></tr>
-        <tr><td>A2</td><td>En un mandante sandbox: sin pasos aplicables, la OC se libera sola al guardar</td><td><span class="st blk">Bloqueada</span></td></tr>
-        <tr><td>A3</td><td>En sandbox: OC multinivel con umbrales por moneda</td><td><span class="st blk">Bloqueada</span></td></tr>
-      </tbody></table></div>
-    </div>
-    <div class="test-card tx">
-      <h3>Transversales (negocio y control)</h3>
-      <div class="tbl-wrap"><table><tbody>
-        <tr><td>X1</td><td>Mapeo de rangos de <code>ZMM_COD_PED</code> (por código) a niveles del workflow</td><td><span class="st todo">Pendiente</span></td></tr>
-        <tr><td>X2</td><td>¿Cada nivel genera una sola tarea, o hay aprobadores en paralelo?</td><td><span class="st todo">Pendiente</span></td></tr>
-        <tr><td>X3</td><td>Auditoría acepta aprobación por usuario técnico (B, C, D)</td><td><span class="st todo">Pendiente</span></td></tr>
-        <tr><td>X4</td><td>¿El negocio acepta umbrales por moneda en lugar de USD? (A)</td><td><span class="st todo">Pendiente</span></td></tr>
       </tbody></table></div>
     </div>
   </div>
