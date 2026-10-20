@@ -6,6 +6,7 @@ rangos de monto.
 
 - Comparativo técnico de opciones: [`docs/index.html`](docs/index.html)
 - Presentación visual para el equipo funcional: [`docs/presentacion.html`](docs/presentacion.html)
+- Presentación visual sin logo: [`docs/presentacion-sin-logo.html`](docs/presentacion-sin-logo.html)
 - Diseño de la solución: [`docs/diseno-solucion.md`](docs/diseno-solucion.md)
 
 ## Contexto
