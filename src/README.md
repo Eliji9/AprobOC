@@ -77,3 +77,4 @@ Datos actuales en ECC (`ZMM_COD_PED`) para migrar:
 | Conversión de moneda | Confirmado: `CL_EXCHANGE_RATES` liberada C1 (Use in Cloud Development = Yes) y firma de `CONVERT_TO_LOCAL_CURRENCY` (`DATE`, `FOREIGN_AMOUNT`, `FOREIGN_CURRENCY`, `LOCAL_CURRENCY` → `LOCAL_AMOUNT`) |
 | Agente excluido | Validado en la PoC: el reenvío falla y la OC queda con estado `FF` |
 | Falla de aprobación después del reenvío | Definido: antes de reenviar, el wrapper guarda el aprobador (agente que tomó la tarea o, si está READY, su destinatario usuario `OTYPE = US` con `SAP_WAPI_WORKITEM_RECIPIENTS`, firma confirmada). Si la aprobación falla, le reenvía la tarea de vuelta |
+| Prueba integral con F9 (OC 1100000509, grupo CRC, 175,15 USD) | Modo prueba: `TS`, WI 47041, nivel 1. Modo real: `AP`, nivel 1 aprobado |
