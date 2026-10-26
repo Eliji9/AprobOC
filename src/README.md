@@ -71,4 +71,4 @@ Datos actuales en ECC (`ZMM_COD_PED`) para migrar:
 | OC en aprobación | Confirmado: OC 1100000509 "En proc. autorización" → `EKKO-PROCSTAT = 03` |
 | Conversión de moneda | Confirmada la firma de `CL_EXCHANGE_RATES=>CONVERT_TO_LOCAL_CURRENCY` (`DATE`, `FOREIGN_AMOUNT`, `FOREIGN_CURRENCY`, `LOCAL_CURRENCY` → `LOCAL_AMOUNT`) |
 | Agente excluido | Validado en la PoC: el reenvío falla y la OC queda con estado `FF` |
-| Falla de aprobación después del reenvío | Pendiente de definir cómo devolver la tarea a su aprobador |
+| Falla de aprobación después del reenvío | Definido: antes de reenviar, el wrapper guarda el aprobador (agente que tomó la tarea o, si está READY, su destinatario con `SAP_WAPI_WORKITEM_RECIPIENTS`). Si la aprobación falla, le reenvía la tarea de vuelta |

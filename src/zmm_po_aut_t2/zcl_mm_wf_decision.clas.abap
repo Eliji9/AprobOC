@@ -21,6 +21,13 @@ CLASS zcl_mm_wf_decision DEFINITION
     CONSTANTS gc_po_catid      TYPE sww_wi2obj-catid     VALUE 'CL'.
     CONSTANTS gc_po_typeid     TYPE sww_wi2obj-typeid    VALUE 'CL_MM_PUR_WF_OBJECT_PO'.
 
+    "! Aprobador actual de la tarea: el agente que la tomó o, si está en
+    "! estado READY (nadie la ha tomado), el primer destinatario usuario.
+    METHODS get_current_approver
+      IMPORTING iv_workitem_id     TYPE sww_wiid
+                iv_actual_agent    TYPE swwwihead-wi_aagent
+      RETURNING VALUE(rv_approver) TYPE syuname.
+
     METHODS forward
       IMPORTING iv_workitem_id   TYPE sww_wiid
                 iv_user          TYPE syuname
@@ -92,6 +99,7 @@ CLASS zcl_mm_wf_decision IMPLEMENTATION.
     DATA lv_error      TYPE /iwwrk/wf_flag.
     DATA lt_return     TYPE bapirettab.
     DATA lv_forwarded  TYPE abap_bool.
+    DATA lv_approver   TYPE syuname.
 
     lv_wi_id = iv_workitem_id.
 
@@ -110,6 +118,9 @@ CLASS zcl_mm_wf_decision IMPLEMENTATION.
     " 1. Reenviar al usuario del job si todavía no es el agente.
     "    Falla (RC 2) si el usuario está excluido, p. ej. si es el creador de la OC.
     IF ls_wi-wi_aagent <> sy-uname.
+      " Guardar el aprobador antes de reenviar, para devolverle la tarea si falla
+      lv_approver = get_current_approver( iv_workitem_id  = lv_wi_id
+                                          iv_actual_agent = ls_wi-wi_aagent ).
       forward( EXPORTING iv_workitem_id = lv_wi_id
                          iv_user        = sy-uname
                IMPORTING ev_return_code = DATA(lv_rc)
@@ -146,17 +157,46 @@ CLASS zcl_mm_wf_decision IMPLEMENTATION.
                          message = VALUE #( lt_return[ type = 'E' ]-message
                                             DEFAULT VALUE #( lt_return[ 1 ]-message OPTIONAL ) ) ).
 
-    " 3. Si se reenvió y la aprobación falló, devolver la tarea al agente original.
-    "    Si la tarea no tenía agente (estaba en el pool de aprobadores), queda
-    "    a nombre del usuario del job: se informa para revisión manual.
+    " 3. Si se reenvió y la aprobación falló, devolver la tarea a su aprobador anterior
     IF lv_forwarded = abap_true.
-      IF ls_wi-wi_aagent IS NOT INITIAL.
+      IF lv_approver IS NOT INITIAL.
         forward( EXPORTING iv_workitem_id = lv_wi_id
-                           iv_user        = ls_wi-wi_aagent
+                           iv_user        = lv_approver
                  IMPORTING ev_return_code = lv_rc ).
       ELSE.
-        rs_result-message = |{ rs_result-message } (tarea quedó a nombre de { sy-uname }: revisar)|.
+        lv_rc = 1.
       ENDIF.
+      rs_result-message = COND #(
+        WHEN lv_rc = 0 THEN |{ rs_result-message } (tarea devuelta a { lv_approver })|
+        ELSE                |{ rs_result-message } (no se pudo devolver la tarea; quedó a nombre de { sy-uname })| ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD get_current_approver.
+
+    DATA lt_recipients TYPE STANDARD TABLE OF swhactor.
+    DATA lv_rc         TYPE sysubrc.
+
+    " Si alguien ya tomó la tarea, ese es el aprobador
+    IF iv_actual_agent IS NOT INITIAL.
+      rv_approver = iv_actual_agent.
+      RETURN.
+    ENDIF.
+
+    " Tarea en READY: destinatarios de la tarea (bandeja del aprobador).
+    " Se toma el primer usuario (OTYPE 'US'); un nivel tiene un solo aprobador.
+    CALL FUNCTION 'SAP_WAPI_WORKITEM_RECIPIENTS'
+      EXPORTING
+        workitem_id = iv_workitem_id
+      IMPORTING
+        return_code = lv_rc
+      TABLES
+        recipients  = lt_recipients.
+
+    IF lv_rc = 0.
+      rv_approver = VALUE #( lt_recipients[ otype = 'US' ]-objid OPTIONAL ).
     ENDIF.
 
   ENDMETHOD.
