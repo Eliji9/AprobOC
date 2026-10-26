@@ -8,6 +8,7 @@ rangos de monto.
 - Presentación visual para el equipo funcional: [`docs/presentacion.html`](docs/presentacion.html)
 - Presentación visual sin logo: [`docs/presentacion-sin-logo.html`](docs/presentacion-sin-logo.html)
 - Diseño de la solución: [`docs/diseno-solucion.md`](docs/diseno-solucion.md)
+- **Objetos de la opción B (aprobada):** [`src/README.md`](src/README.md)
 
 ## Contexto
 
@@ -46,8 +47,8 @@ un servicio OData. Clean core del núcleo: Tier 1 + 1 wrapper Tier 2, 0 % Tier 3
 
 ## Estado
 
-Fase actual: **análisis y diseño de solución, pruebas de concepto**. No se construyen aún objetos
-productivos; los programas de `poc/` son desechables ($TMP, solo DS4).
+Opción aprobada: **B (motor en S/4 + Application Job)**. Objetos en `src/`. Los programas de
+`poc/` son desechables ($TMP, solo DS4).
 
 ### Pruebas de concepto
 

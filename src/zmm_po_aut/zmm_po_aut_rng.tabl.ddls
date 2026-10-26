@@ -1,0 +1,24 @@
+@EndUserText.label : 'Aprob. automática OC: rangos por grupo de compras'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #C
+@AbapCatalog.dataMaintenance : #ALLOWED
+define table zmm_po_aut_rng {
+
+  key client            : abap.clnt not null;
+  @EndUserText.label : 'Grupo de compras'
+  key purchasing_group  : abap.char(3) not null;
+  @Semantics.amount.currencyCode : 'zmm_po_aut_rng.currency'
+  @EndUserText.label : 'Monto desde'
+  amount_from           : abap.curr(15,2);
+  @Semantics.amount.currencyCode : 'zmm_po_aut_rng.currency'
+  @EndUserText.label : 'Monto hasta'
+  amount_to             : abap.curr(15,2);
+  @EndUserText.label : 'Moneda de los rangos'
+  currency              : abap.cuky;
+  @EndUserText.label : 'Activo'
+  is_active             : abap_boolean;
+  local_last_changed_at : abp_locinst_lastchange_tstmpl;
+  last_changed_at       : abp_lastchange_tstmpl;
+
+}
