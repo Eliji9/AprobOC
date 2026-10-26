@@ -69,6 +69,6 @@ Datos actuales en ECC (`ZMM_COD_PED`) para migrar:
 |---|---|
 | Relación tarea → OC | Confirmado: `SWW_WI2OBJ` del WI 47037 → `CATID = CL`, `TYPEID = CL_MM_PUR_WF_OBJECT_PO`, `INSTID = 1100000508`. El wrapper filtra por ese tipo para ignorar anexos (`BO` / `SOFM`) |
 | OC en aprobación | Confirmado: OC 1100000509 "En proc. autorización" → `EKKO-PROCSTAT = 03` |
-| Conversión de moneda | Confirmada la firma de `CL_EXCHANGE_RATES=>CONVERT_TO_LOCAL_CURRENCY` (`DATE`, `FOREIGN_AMOUNT`, `FOREIGN_CURRENCY`, `LOCAL_CURRENCY` → `LOCAL_AMOUNT`) |
+| Conversión de moneda | Confirmado: `CL_EXCHANGE_RATES` liberada C1 (Use in Cloud Development = Yes) y firma de `CONVERT_TO_LOCAL_CURRENCY` (`DATE`, `FOREIGN_AMOUNT`, `FOREIGN_CURRENCY`, `LOCAL_CURRENCY` → `LOCAL_AMOUNT`) |
 | Agente excluido | Validado en la PoC: el reenvío falla y la OC queda con estado `FF` |
-| Falla de aprobación después del reenvío | Definido: antes de reenviar, el wrapper guarda el aprobador (agente que tomó la tarea o, si está READY, su destinatario con `SAP_WAPI_WORKITEM_RECIPIENTS`). Si la aprobación falla, le reenvía la tarea de vuelta |
+| Falla de aprobación después del reenvío | Definido: antes de reenviar, el wrapper guarda el aprobador (agente que tomó la tarea o, si está READY, su destinatario usuario `OTYPE = US` con `SAP_WAPI_WORKITEM_RECIPIENTS`, firma confirmada). Si la aprobación falla, le reenvía la tarea de vuelta |
