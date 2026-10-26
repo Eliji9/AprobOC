@@ -44,7 +44,11 @@ hasta confirmar si se usará.
 6. **Job**: `ZCL_MM_PO_AUT_JOB`; luego *New → Application Job Catalog Entry* (`ZMM_PO_AUT_JOB_CAT`,
    clase `ZCL_MM_PO_AUT_JOB`) y *Application Job Template* (`ZMM_PO_AUT_JOB_TMPL`).
 7. **ATC** con la variante de ABAP Cloud sobre `ZMM_PO_AUT`: sin errores.
-8. **Programar el job** desde *Application Jobs* con el usuario `ZJOBPROCESOS` y la frecuencia
+8. **Probar sin job**: abrir `ZCL_MM_PO_AUT_JOB` en ADT y ejecutar con **F9** (consola). Por defecto
+   corre en modo prueba (`gc_console_test_mode = abap_true`) y muestra por OC el total, el work item,
+   el nivel y el estado. Para aprobar desde la consola, cambiar la constante a `abap_false`
+   (aprueba con el usuario que ejecuta, no con `ZJOBPROCESOS`).
+9. **Programar el job** desde *Application Jobs* con el usuario `ZJOBPROCESOS` y la frecuencia
    definida. Primera corrida con *Modo prueba* marcado.
 
 ## Regla de negocio
