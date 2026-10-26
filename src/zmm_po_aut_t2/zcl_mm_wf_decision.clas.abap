@@ -18,6 +18,8 @@ CLASS zcl_mm_wf_decision DEFINITION
     CONSTANTS gc_task          TYPE swwwihead-wi_rh_task VALUE 'TS00800531'.
     CONSTANTS gc_action        TYPE string               VALUE `Decision`.
     CONSTANTS gc_decision_key  TYPE swr_decikey          VALUE '0001'.
+    CONSTANTS gc_po_catid      TYPE sww_wi2obj-catid     VALUE 'CL'.
+    CONSTANTS gc_po_typeid     TYPE sww_wi2obj-typeid    VALUE 'CL_MM_PUR_WF_OBJECT_PO'.
 
     METHODS forward
       IMPORTING iv_workitem_id   TYPE sww_wiid
@@ -42,13 +44,16 @@ CLASS zcl_mm_wf_decision IMPLEMENTATION.
     lr_instid = VALUE #( FOR lv_po IN it_purchase_orders
                          ( sign = 'I' option = 'EQ' low = lv_po ) ).
 
-    " Tareas TS00800531 abiertas y su OC (objeto principal del work item).
-    " Validar en DS4 (SE16N SWW_WI2OBJ) que INSTID contiene el número de OC.
+    " Tareas TS00800531 abiertas y su OC. Validado en DS4 (SWW_WI2OBJ, WI 47037):
+    " CATID = 'CL', TYPEID = 'CL_MM_PUR_WF_OBJECT_PO', INSTID = número de OC.
+    " El filtro por tipo excluye los objetos de anexos (BO / SOFM).
     SELECT DISTINCT h~wi_id, h~top_wi_id, o~instid
       FROM swwwihead AS h
       INNER JOIN sww_wi2obj AS o ON o~wi_id = h~wi_id
       WHERE h~wi_rh_task = @gc_task
         AND h~wi_stat    IN ( 'READY', 'SELECTED', 'STARTED' )
+        AND o~catid      = @gc_po_catid
+        AND o~typeid     = @gc_po_typeid
         AND o~instid     IN @lr_instid
         AND o~removed    = @space
       INTO TABLE @DATA(lt_open).

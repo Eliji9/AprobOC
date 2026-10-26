@@ -63,12 +63,12 @@ Datos actuales en ECC (`ZMM_COD_PED`) para migrar:
 | GBG | 0,00 | 5.000,00 | USD |
 | GBO | 1,00 | 30.000,00 | USD |
 
-## Puntos a validar al activar
+## Validaciones en DS4 (26-10-2026)
 
-| Punto | Dónde | Qué revisar |
-|---|---|---|
-| Relación tarea → OC | `ZCL_MM_WF_DECISION->get_open_tasks` | En SE16N, `SWW_WI2OBJ` de un work item `TS00800531`: que `INSTID` sea el número de OC |
-| Estado "En aprobación" | `ZCL_MM_PO_AUT_ENGINE` (`gc_procstat_in_approval = '03'`) | Valor de `EKKO-PROCSTAT` de una OC "En proc. autorización" |
-| Conversión de moneda | `ZCL_MM_PO_AUT_ENGINE->get_order_total` | Firma de `CL_EXCHANGE_RATES=>CONVERT_TO_LOCAL_CURRENCY` (o la API liberada equivalente) |
-| Falla tras reenviar | `ZCL_MM_WF_DECISION->approve` | Si la tarea no tenía agente, queda a nombre de `ZJOBPROCESOS` y se informa en el mensaje |
-| Agente excluido | Reenvío con RC ≠ 0 | El usuario del job no debe crear OC; esas OC quedan con estado `FF` |
+| Punto | Resultado |
+|---|---|
+| Relación tarea → OC | Confirmado: `SWW_WI2OBJ` del WI 47037 → `CATID = CL`, `TYPEID = CL_MM_PUR_WF_OBJECT_PO`, `INSTID = 1100000508`. El wrapper filtra por ese tipo para ignorar anexos (`BO` / `SOFM`) |
+| OC en aprobación | Confirmado: OC 1100000509 "En proc. autorización" → `EKKO-PROCSTAT = 03` |
+| Conversión de moneda | Confirmada la firma de `CL_EXCHANGE_RATES=>CONVERT_TO_LOCAL_CURRENCY` (`DATE`, `FOREIGN_AMOUNT`, `FOREIGN_CURRENCY`, `LOCAL_CURRENCY` → `LOCAL_AMOUNT`) |
+| Agente excluido | Validado en la PoC: el reenvío falla y la OC queda con estado `FF` |
+| Falla de aprobación después del reenvío | Pendiente de definir cómo devolver la tarea a su aprobador |
