@@ -27,13 +27,16 @@ INTERFACE zif_mm_po_aut_engine
       message          TYPE string,
     END OF ty_result.
   TYPES tt_result TYPE STANDARD TABLE OF ty_result WITH EMPTY KEY.
+  TYPES tt_po_range TYPE RANGE OF i_purchaseorderapi01-purchaseorder.
 
   "! Busca las OC en aprobación, evalúa el rango de su grupo de compras y
   "! aprueba la tarea abierta de las que cumplen. Una tarea (nivel) por OC y
   "! por ejecución; el siguiente nivel lo toma la ejecución siguiente.
-  "! @parameter iv_test_mode | Evalúa sin reenviar ni aprobar
+  "! @parameter iv_test_mode       | Evalúa sin reenviar ni aprobar
+  "! @parameter it_purchase_orders | Opcional: limita a estas OC (vacío = todas)
   METHODS process_pending
-    IMPORTING iv_test_mode     TYPE abap_bool DEFAULT abap_false
-    RETURNING VALUE(rt_result) TYPE tt_result.
+    IMPORTING iv_test_mode       TYPE abap_bool DEFAULT abap_false
+              it_purchase_orders TYPE tt_po_range OPTIONAL
+    RETURNING VALUE(rt_result)   TYPE tt_result.
 
 ENDINTERFACE.

@@ -34,7 +34,8 @@ CLASS zcl_mm_po_aut_engine DEFINITION
       RETURNING VALUE(rt_rule) TYPE tt_rule.
 
     METHODS get_pending_orders
-      RETURNING VALUE(rt_po) TYPE tt_po.
+      IMPORTING it_purchase_orders TYPE zif_mm_po_aut_engine=>tt_po_range
+      RETURNING VALUE(rt_po)       TYPE tt_po.
 
     METHODS get_order_total
       IMPORTING iv_purchase_order TYPE i_purchaseorderapi01-purchaseorder
@@ -65,7 +66,7 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
     ENDIF.
 
     " 1. Evaluar el rango de cada OC en aprobación
-    LOOP AT get_pending_orders( ) INTO DATA(ls_po).
+    LOOP AT get_pending_orders( it_purchase_orders ) INTO DATA(ls_po).
 
       APPEND VALUE #( purchase_order   = ls_po-purchase_order
                       purchasing_group = ls_po-purchasing_group ) TO rt_result
@@ -145,7 +146,8 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
 
 
   METHOD get_pending_orders.
-    " Solo OC de grupos de compras con rango activo
+    " Solo OC de grupos de compras con rango activo.
+    " Rango de OC vacío = todas (IN con rango vacío no filtra).
     SELECT po~PurchaseOrder    AS purchase_order,
            po~PurchasingGroup  AS purchasing_group,
            po~DocumentCurrency AS currency
@@ -154,6 +156,7 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
         ON  rng~purchasing_group = po~PurchasingGroup
         AND rng~is_active        = @abap_true
       WHERE po~PurchasingProcessingStatus = @gc_procstat_in_approval
+        AND po~PurchaseOrder              IN @it_purchase_orders
       INTO CORRESPONDING FIELDS OF TABLE @rt_po.
   ENDMETHOD.
 
