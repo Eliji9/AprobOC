@@ -15,8 +15,8 @@ rangos de monto.
 | Tema | ECC (actual) | S/4HANA Private (objetivo) |
 |---|---|---|
 | Liberación | Estrategia clásica (`T16FS`) + `BAPI_PO_RELEASE` | Flexible Workflow (tarea `TS00800531`) |
-| Regla | Rangos de monto por código de liberación (`ZMM_COD_PED`) | Rangos de monto por nivel de aprobación |
-| Ejecutor | Usuario genérico creador del job | Según la opción elegida |
+| Regla | Rangos de monto por código de liberación (`ZMM_COD_PED`) | Rangos de monto por grupo de compras (`ZMM_PO_AUT_RNG`) |
+| Ejecutor | Usuario genérico creador del job | `ZJOBPROCESOS` (Application Job) |
 
 **Alcance:** solo la aprobación automática. Los procesos post-liberación (Coupa, anticipo,
 MIGO) quedan fuera de alcance por ahora.
@@ -64,6 +64,6 @@ Opción aprobada: **B (motor en S/4 + Application Job)**. Objetos en `src/`. Los
 ## Estructura prevista
 
 ```
-src/            Objetos ABAP (abapGit), cuando inicie el desarrollo
+src/            Objetos ABAP de la opción B (código para crear en ADT)
 docs/           Documentación de diseño y comparativo de opciones
 ```
