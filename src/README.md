@@ -50,7 +50,8 @@ hasta confirmar si se usará.
    el nivel y el estado. Para aprobar desde la consola, cambiar la constante a `abap_false`
    (aprueba con el usuario que ejecuta, no con `ZJOBPROCESOS`).
 9. **Programar el job** desde *Application Jobs* con el usuario `ZJOBPROCESOS` y la frecuencia
-   definida. Primera corrida con *Modo prueba* marcado.
+   definida. Parámetro opcional *Orden de compra*: una o varias OC o intervalos (vacío = todas).
+   El job siempre aprueba; para evaluar sin aprobar, usar la consola (paso 8).
 
 ## Regla de negocio
 

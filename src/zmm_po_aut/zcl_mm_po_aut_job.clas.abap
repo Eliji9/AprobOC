@@ -15,7 +15,6 @@ CLASS zcl_mm_po_aut_job DEFINITION
     INTERFACES if_oo_adt_classrun.
 
   PRIVATE SECTION.
-    CONSTANTS gc_param_test TYPE c LENGTH 8 VALUE 'P_TEST'.
     CONSTANTS gc_param_po   TYPE c LENGTH 8 VALUE 'S_EBELN'.
 
     "! Ejecución desde consola (F9): abap_true = solo evalúa; abap_false = aprueba.
@@ -33,27 +32,14 @@ CLASS zcl_mm_po_aut_job IMPLEMENTATION.
 
   METHOD if_apj_dt_exec_object~get_parameters.
 
+    " Una o varias OC (valores individuales o intervalos). Vacío = todas.
     et_parameter_def = VALUE #(
       ( selname        = gc_param_po
         kind           = if_apj_dt_exec_object=>select_option
         datatype       = 'C'
         length         = 10
         param_text     = 'Orden de compra (vacío = todas)'
-        changeable_ind = abap_true )
-      ( selname        = gc_param_test
-        kind           = if_apj_dt_exec_object=>parameter
-        datatype       = 'C'
-        length         = 1
-        param_text     = 'Modo prueba (no aprueba)'
-        checkbox_ind   = abap_true
         changeable_ind = abap_true ) ).
-
-    et_parameter_val = VALUE #(
-      ( selname = gc_param_test
-        kind    = if_apj_dt_exec_object=>parameter
-        sign    = 'I'
-        option  = 'EQ'
-        low     = abap_false ) ).
 
   ENDMETHOD.
 
@@ -61,9 +47,6 @@ CLASS zcl_mm_po_aut_job IMPLEMENTATION.
   METHOD if_apj_rt_exec_object~execute.
 
     DATA lt_po_range TYPE zif_mm_po_aut_engine=>tt_po_range.
-
-    DATA(lv_test_mode) = CONV abap_bool(
-      VALUE #( it_parameters[ selname = gc_param_test ]-low OPTIONAL ) ).
 
     LOOP AT it_parameters INTO DATA(ls_param) WHERE selname = gc_param_po.
       APPEND VALUE #( sign   = ls_param-sign
@@ -76,7 +59,8 @@ CLASS zcl_mm_po_aut_job IMPLEMENTATION.
 
     DATA(lo_engine) = CAST zif_mm_po_aut_engine( NEW zcl_mm_po_aut_engine( ) ).
 
-    lo_engine->process_pending( iv_test_mode       = lv_test_mode
+    " El job siempre aprueba. El modo prueba solo existe en la consola (F9).
+    lo_engine->process_pending( iv_test_mode       = abap_false
                                 it_purchase_orders = lt_po_range ).
 
   ENDMETHOD.
