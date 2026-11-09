@@ -1,8 +1,9 @@
 "! <p class="shorttext synchronized">Aprob. automática OC: motor</p>
 "! Motor de aprobación automática de OC (ABAP Cloud, Tier 1).
 "! 1. OC "En proc. autorización" de grupos de compras con rango activo
-"! 2. Total de la OC convertido a la moneda del rango
-"! 3. Si el total está en el rango: tarea abierta y aprobación (wrapper Tier 2)
+"! 2. Ningún material de la OC con jerarquía de producto
+"! 3. Total de la OC convertido a la moneda del rango
+"! 4. Si el total está en el rango: tarea abierta y aprobación (wrapper Tier 2)
 CLASS zcl_mm_po_aut_engine DEFINITION
   PUBLIC
   FINAL
@@ -36,6 +37,12 @@ CLASS zcl_mm_po_aut_engine DEFINITION
     METHODS get_pending_orders
       IMPORTING it_purchase_orders TYPE zif_mm_po_aut_engine=>tt_po_range
       RETURNING VALUE(rt_po)       TYPE tt_po.
+
+    "! abap_true si alguna posición no borrada tiene un material con jerarquía
+    "! de producto (MARA-PRDHA). Una sola basta para no aprobar la OC.
+    METHODS has_product_hierarchy
+      IMPORTING iv_purchase_order TYPE i_purchaseorderapi01-purchaseorder
+      RETURNING VALUE(rv_result)  TYPE abap_bool.
 
     METHODS get_order_total
       IMPORTING iv_purchase_order TYPE i_purchaseorderapi01-purchaseorder
@@ -76,6 +83,13 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
            INTO DATA(ls_rule).
       IF sy-subrc <> 0.
         <ls_res>-status = zif_mm_po_aut_engine=>gc_status-no_rule.
+        CONTINUE.
+      ENDIF.
+
+      " Si algún material tiene jerarquía de producto, la OC queda manual
+      IF has_product_hierarchy( ls_po-purchase_order ) = abap_true.
+        <ls_res>-status  = zif_mm_po_aut_engine=>gc_status-has_hierarchy.
+        <ls_res>-message = `Material con jerarquía de producto`.
         CONTINUE.
       ENDIF.
 
@@ -158,6 +172,18 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
       WHERE po~PurchasingProcessingStatus = @gc_procstat_in_approval
         AND po~PurchaseOrder              IN @it_purchase_orders
       INTO CORRESPONDING FIELDS OF TABLE @rt_po.
+  ENDMETHOD.
+
+
+  METHOD has_product_hierarchy.
+    " Posiciones sin material (p. ej. texto) no cuentan como jerarquía
+    SELECT SINGLE @abap_true
+      FROM i_purchaseorderitemapi01 AS item
+      INNER JOIN i_product AS prod ON prod~Product = item~Material
+      WHERE item~PurchaseOrder                  = @iv_purchase_order
+        AND item~PurchasingDocumentDeletionCode = @space
+        AND prod~ProductHierarchy               <> @space
+      INTO @rv_result.
   ENDMETHOD.
 
 

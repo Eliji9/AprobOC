@@ -95,7 +95,7 @@ CLASS zcl_mm_po_aut_job IMPLEMENTATION.
     ENDIF.
 
     " Estados: AP aprobada · TS cumple (modo prueba) · OR fuera de rango · NR sin rango
-    "          NT sin tarea · FF no se pudo reenviar · ER error
+    "          PH material con jerarquía · NT sin tarea · FF no se pudo reenviar · ER error
     out->write( lt_result ).
 
   ENDMETHOD.
