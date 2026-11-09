@@ -22,6 +22,7 @@ las tablas, el objeto de mantenimiento y el job se crean con los asistentes de A
 | 6 | `ZIF_MM_PO_AUT_ENGINE` | Interfaz del motor | `ZMM_PO_AUT` | `zmm_po_aut/zif_mm_po_aut_engine.intf.abap` |
 | 7 | `ZCL_MM_PO_AUT_ENGINE` | Clase del motor | `ZMM_PO_AUT` | `zmm_po_aut/zcl_mm_po_aut_engine.clas.abap` |
 | 8 | `ZCL_MM_PO_AUT_JOB` | Clase del Application Job | `ZMM_PO_AUT` | `zmm_po_aut/zcl_mm_po_aut_job.clas.abap` |
+| 8b | `ZMM_PO_AUT` / subobjeto `APROB` | Application Log Object | `ZMM_PO_AUT` | — (asistente) |
 | 9 | `ZMM_PO_AUT_JOB_CAT` | Application Job Catalog Entry | `ZMM_PO_AUT` | — (asistente) |
 | 10 | `ZMM_PO_AUT_JOB_TMPL` | Application Job Template | `ZMM_PO_AUT` | — (asistente) |
 
@@ -41,7 +42,8 @@ hasta confirmar si se usará.
    (pestaña *API State* en ADT).
 5. **Excepción, interfaz y motor** (en `ZMM_PO_AUT`): `ZCX_MM_PO_AUT_ERROR`,
    `ZIF_MM_PO_AUT_ENGINE`, `ZCL_MM_PO_AUT_ENGINE`.
-6. **Job**: `ZCL_MM_PO_AUT_JOB`; luego *New → Application Job Catalog Entry* (`ZMM_PO_AUT_JOB_CAT`,
+6. **Log**: *New → Application Log Object* `ZMM_PO_AUT` con subobjeto `APROB`.
+   **Job**: `ZCL_MM_PO_AUT_JOB`; luego *New → Application Job Catalog Entry* (`ZMM_PO_AUT_JOB_CAT`,
    clase `ZCL_MM_PO_AUT_JOB`) y *Application Job Template* (`ZMM_PO_AUT_JOB_TMPL`).
 7. **ATC** con la variante de ABAP Cloud sobre `ZMM_PO_AUT`: sin errores.
 8. **Probar sin job**: abrir `ZCL_MM_PO_AUT_JOB` en ADT y ejecutar con **F9** (consola). Para una sola OC,
