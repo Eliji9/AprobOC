@@ -25,8 +25,8 @@ CLASS zcl_mm_po_aut_job DEFINITION
     CONSTANTS gc_console_po TYPE i_purchaseorderapi01-purchaseorder VALUE ''.
 
     "! Objeto / subobjeto del Application Log (crear en ADT: New > Application Log Object)
-    CONSTANTS gc_log_object    TYPE cl_bali_header_setter=>ty_object    VALUE 'ZMM_PO_AUT'.
-    CONSTANTS gc_log_subobject TYPE cl_bali_header_setter=>ty_subobject VALUE 'APROB'.
+    CONSTANTS gc_log_object    TYPE c LENGTH 20 VALUE 'ZMM_PO_AUT'.
+    CONSTANTS gc_log_subobject TYPE c LENGTH 20 VALUE 'APROB'.
 
     "! Registra en el log del Application Job una línea por OC procesada
     METHODS write_log
