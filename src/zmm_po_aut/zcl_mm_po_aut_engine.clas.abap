@@ -38,7 +38,8 @@ CLASS zcl_mm_po_aut_engine DEFINITION
       RETURNING VALUE(rt_rule) TYPE tt_rule.
 
     METHODS get_pending_orders
-      IMPORTING it_purchase_orders TYPE zif_mm_po_aut_engine=>tt_po_range
+      IMPORTING it_rules           TYPE tt_rule
+                it_purchase_orders TYPE zif_mm_po_aut_engine=>tt_po_range
       RETURNING VALUE(rt_po)       TYPE tt_po.
 
     "! abap_true si alguna posición no borrada tiene un material con jerarquía
@@ -76,7 +77,8 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
     ENDIF.
 
     " 1. Evaluar el rango de cada OC en aprobación
-    LOOP AT get_pending_orders( it_purchase_orders ) INTO DATA(ls_po).
+    LOOP AT get_pending_orders( it_rules           = lt_rules
+                                it_purchase_orders = it_purchase_orders ) INTO DATA(ls_po).
 
       APPEND VALUE #( purchase_order   = ls_po-purchase_order
                       purchasing_group = ls_po-purchasing_group ) TO rt_result
@@ -164,30 +166,53 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
 
   METHOD get_pending_orders.
     " Solo OC de grupos de compras con rango activo.
-    " Rango de OC vacío = todas (IN con rango vacío no filtra).
-    SELECT po~PurchaseOrder    AS purchase_order,
-           po~PurchasingGroup  AS purchasing_group,
-           po~DocumentCurrency AS currency
-      FROM i_purchaseorderapi01 AS po
-      INNER JOIN zmm_po_aut_rng AS rng
-        ON  rng~purchasing_group = po~PurchasingGroup
-        AND rng~is_active        = @abap_true
+    " WITH PRIVILEGED ACCESS no se admite en un JOIN: se filtra por rango de grupos.
+    DATA lr_group TYPE RANGE OF i_purchaseorderapi01-purchasinggroup.
+
+    lr_group = VALUE #( FOR ls_rule IN it_rules
+                        ( sign = 'I' option = 'EQ' low = ls_rule-purchasing_group ) ).
+    IF lr_group IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    " Rango de OC vacío = todas (IN con rango vacío no filtra)
+    SELECT PurchaseOrder    AS purchase_order,
+           PurchasingGroup  AS purchasing_group,
+           DocumentCurrency AS currency
+      FROM i_purchaseorderapi01
       WITH PRIVILEGED ACCESS
-      WHERE po~PurchasingProcessingStatus = @gc_procstat_in_approval
-        AND po~PurchaseOrder              IN @it_purchase_orders
+      WHERE PurchasingProcessingStatus = @gc_procstat_in_approval
+        AND PurchasingGroup            IN @lr_group
+        AND PurchaseOrder              IN @it_purchase_orders
       INTO CORRESPONDING FIELDS OF TABLE @rt_po.
   ENDMETHOD.
 
 
   METHOD has_product_hierarchy.
-    " Posiciones sin material (p. ej. texto) no cuentan como jerarquía
-    SELECT SINGLE @abap_true
-      FROM i_purchaseorderitemapi01 AS item
-      INNER JOIN i_product AS prod ON prod~Product = item~Material
+    " Dos lecturas (WITH PRIVILEGED ACCESS no se admite en un JOIN).
+    " Posiciones sin material (p. ej. texto) no cuentan como jerarquía.
+    DATA lr_product TYPE RANGE OF i_product-product.
+
+    SELECT DISTINCT Material
+      FROM i_purchaseorderitemapi01
       WITH PRIVILEGED ACCESS
-      WHERE item~PurchaseOrder                  = @iv_purchase_order
-        AND item~PurchasingDocumentDeletionCode = @space
-        AND prod~ProductHierarchy               <> @space
+      WHERE PurchaseOrder                  = @iv_purchase_order
+        AND PurchasingDocumentDeletionCode = @space
+        AND Material                       <> @space
+      INTO TABLE @DATA(lt_material).
+
+    IF lt_material IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    lr_product = VALUE #( FOR ls_mat IN lt_material
+                          ( sign = 'I' option = 'EQ' low = ls_mat-Material ) ).
+
+    SELECT SINGLE @abap_true
+      FROM i_product
+      WITH PRIVILEGED ACCESS
+      WHERE Product          IN @lr_product
+        AND ProductHierarchy <> @space
       INTO @rv_result.
   ENDMETHOD.
 
