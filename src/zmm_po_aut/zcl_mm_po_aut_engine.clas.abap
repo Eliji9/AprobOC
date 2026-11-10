@@ -17,7 +17,7 @@ CLASS zcl_mm_po_aut_engine DEFINITION
 
     "! @parameter io_wf_decision | Inyección para pruebas unitarias (por defecto, el wrapper real)
     METHODS constructor
-      IMPORTING io_wf_decision TYPE REF TO zif_mm_wf_decision OPTIONAL.
+      IMPORTING io_wf_decision TYPE REF TO zif_mm_wf_decisiontask OPTIONAL.
 
   PRIVATE SECTION.
     " Estado de procesamiento de la OC "En aprobación" (EKKO-PROCSTAT)
@@ -32,7 +32,7 @@ CLASS zcl_mm_po_aut_engine DEFINITION
     TYPES tt_po   TYPE STANDARD TABLE OF ty_po WITH EMPTY KEY.
     TYPES tt_rule TYPE HASHED TABLE OF zmm_po_aut_rng WITH UNIQUE KEY purchasing_group.
 
-    DATA mo_wf_decision TYPE REF TO zif_mm_wf_decision.
+    DATA mo_wf_decision TYPE REF TO zif_mm_wf_decisiontask.
 
     METHODS get_rules
       RETURNING VALUE(rt_rule) TYPE tt_rule.
@@ -69,7 +69,7 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
 
   METHOD zif_mm_po_aut_engine~process_pending.
 
-    DATA lt_candidates TYPE zif_mm_wf_decision=>tt_purchase_order.
+    DATA lt_candidates TYPE zif_mm_wf_decisiontask=>tt_purchase_order.
 
     DATA(lt_rules) = get_rules( ).
     IF lt_rules IS INITIAL.
@@ -149,8 +149,8 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
 
       <ls_res>-message = ls_decision-message.
       <ls_res>-status  = SWITCH #( ls_decision-result
-                           WHEN zif_mm_wf_decision=>gc_result-approved       THEN zif_mm_po_aut_engine=>gc_status-approved
-                           WHEN zif_mm_wf_decision=>gc_result-forward_failed THEN zif_mm_po_aut_engine=>gc_status-forward_failed
+                           WHEN zif_mm_wf_decisiontask=>gc_result-approved       THEN zif_mm_po_aut_engine=>gc_status-approved
+                           WHEN zif_mm_wf_decisiontask=>gc_result-forward_failed THEN zif_mm_po_aut_engine=>gc_status-forward_failed
                            ELSE zif_mm_po_aut_engine=>gc_status-error ).
     ENDLOOP.
 

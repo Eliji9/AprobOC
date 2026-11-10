@@ -16,7 +16,7 @@ las tablas, el objeto de mantenimiento y el job se crean con los asistentes de A
 |---|---|---|---|---|
 | 1 | `ZMM_PO_AUT_RNG` | Tabla de BD (customizing, clase C) | `ZMM_PO_AUT` | `zmm_po_aut/zmm_po_aut_rng.tabl.ddls` |
 | 2 | Objetos de mantenimiento | Generados (ver paso 3) | `ZMM_PO_AUT` | — |
-| 3 | `ZIF_MM_WF_DECISION` | Interfaz, liberada C1 | `ZMM_PO_AUT_T2` | `zmm_po_aut_t2/zif_mm_wf_decision.intf.abap` |
+| 3 | `ZIF_MM_WF_DECISIONTASK` | Interfaz, liberada C1 | `ZMM_PO_AUT_T2` | `zmm_po_aut_t2/zif_mm_wf_decisiontask.intf.abap` |
 | 4 | `ZCL_MM_WF_DECISION` | Clase wrapper, liberada C1 | `ZMM_PO_AUT_T2` | `zmm_po_aut_t2/zcl_mm_wf_decision.clas.abap` |
 | 5 | `ZCX_MM_PO_AUT_ERROR` | Clase de excepción | `ZMM_PO_AUT` | `zmm_po_aut/zcx_mm_po_aut_error.clas.abap` |
 | 6 | `ZIF_MM_PO_AUT_ENGINE` | Interfaz del motor | `ZMM_PO_AUT` | `zmm_po_aut/zif_mm_po_aut_engine.intf.abap` |
@@ -37,7 +37,7 @@ hasta confirmar si se usará.
    → *Business Configuration Maintenance Object*. Genera las CDS, el behavior, el servicio y el
    objeto de mantenimiento (`ZMM_PO_AUT_RNG_MO`). Publicar el binding. El negocio mantiene los
    rangos desde la app *Custom Business Configurations*.
-4. **Wrapper** (en `ZMM_PO_AUT_T2`): crear `ZIF_MM_WF_DECISION` y `ZCL_MM_WF_DECISION`, activar y
+4. **Wrapper** (en `ZMM_PO_AUT_T2`): crear `ZIF_MM_WF_DECISIONTASK` y `ZCL_MM_WF_DECISION`, activar y
    liberar **ambos** con contrato **C1 – Use System-Internally / Use in Cloud Development**
    (pestaña *API State* en ADT).
 5. **Excepción, interfaz y motor** (en `ZMM_PO_AUT`): `ZCX_MM_PO_AUT_ERROR`,

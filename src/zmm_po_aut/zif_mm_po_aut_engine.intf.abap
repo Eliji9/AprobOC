@@ -22,7 +22,7 @@ INTERFACE zif_mm_po_aut_engine
       purchasing_group TYPE i_purchaseorderapi01-purchasinggroup,
       total_amount     TYPE decfloat34,
       currency         TYPE zmm_po_aut_rng-currency,
-      workitem_id      TYPE zif_mm_wf_decision=>ty_workitem_id,
+      workitem_id      TYPE zif_mm_wf_decisiontask=>ty_workitem_id,
       approval_level   TYPE i,
       status           TYPE c LENGTH 2,
       message          TYPE string,

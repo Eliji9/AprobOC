@@ -2,7 +2,7 @@
 "! Contrato del wrapper Tier 2. Se libera con contrato C1 (Use in Cloud Development)
 "! para que el motor ABAP Cloud lo consuma. Solo usa tipos básicos, porque los
 "! elementos de datos del workflow (SWW_WIID, etc.) no están liberados.
-INTERFACE zif_mm_wf_decision
+INTERFACE zif_mm_wf_decisiontask
   PUBLIC.
 
   TYPES ty_workitem_id    TYPE n LENGTH 12.

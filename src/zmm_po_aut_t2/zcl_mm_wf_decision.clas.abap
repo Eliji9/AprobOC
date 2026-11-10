@@ -12,7 +12,7 @@ CLASS zcl_mm_wf_decision DEFINITION
   CREATE PUBLIC.
 
   PUBLIC SECTION.
-    INTERFACES zif_mm_wf_decision.
+    INTERFACES zif_mm_wf_decisiontask.
 
   PRIVATE SECTION.
     CONSTANTS gc_task          TYPE swwwihead-wi_rh_task VALUE 'TS00800531'.
@@ -40,7 +40,7 @@ ENDCLASS.
 
 CLASS zcl_mm_wf_decision IMPLEMENTATION.
 
-  METHOD zif_mm_wf_decision~get_open_tasks.
+  METHOD zif_mm_wf_decisiontask~get_open_tasks.
 
     DATA lr_instid TYPE RANGE OF sww_wi2obj-instid.
 
@@ -93,7 +93,7 @@ CLASS zcl_mm_wf_decision IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_mm_wf_decision~approve.
+  METHOD zif_mm_wf_decisiontask~approve.
 
     DATA lv_wi_id      TYPE sww_wiid.
     DATA lv_error      TYPE /iwwrk/wf_flag.
@@ -110,7 +110,7 @@ CLASS zcl_mm_wf_decision IMPLEMENTATION.
 
     IF sy-subrc <> 0
        OR ( ls_wi-wi_stat <> 'READY' AND ls_wi-wi_stat <> 'SELECTED' AND ls_wi-wi_stat <> 'STARTED' ).
-      rs_result = VALUE #( result  = zif_mm_wf_decision=>gc_result-error
+      rs_result = VALUE #( result  = zif_mm_wf_decisiontask=>gc_result-error
                            message = |Work item { lv_wi_id ALPHA = OUT } no está pendiente| ).
       RETURN.
     ENDIF.
@@ -126,7 +126,7 @@ CLASS zcl_mm_wf_decision IMPLEMENTATION.
                IMPORTING ev_return_code = DATA(lv_rc)
                          ev_message     = DATA(lv_fwd_msg) ).
       IF lv_rc <> 0.
-        rs_result = VALUE #( result  = zif_mm_wf_decision=>gc_result-forward_failed
+        rs_result = VALUE #( result  = zif_mm_wf_decisiontask=>gc_result-forward_failed
                              message = lv_fwd_msg ).
         RETURN.
       ENDIF.
@@ -148,12 +148,12 @@ CLASS zcl_mm_wf_decision IMPLEMENTATION.
 
     IF lv_error IS INITIAL.
       COMMIT WORK AND WAIT.
-      rs_result = VALUE #( result = zif_mm_wf_decision=>gc_result-approved ).
+      rs_result = VALUE #( result = zif_mm_wf_decisiontask=>gc_result-approved ).
       RETURN.
     ENDIF.
 
     ROLLBACK WORK.
-    rs_result = VALUE #( result  = zif_mm_wf_decision=>gc_result-error
+    rs_result = VALUE #( result  = zif_mm_wf_decisiontask=>gc_result-error
                          message = VALUE #( lt_return[ type = 'E' ]-message
                                             DEFAULT VALUE #( lt_return[ 1 ]-message OPTIONAL ) ) ).
 
