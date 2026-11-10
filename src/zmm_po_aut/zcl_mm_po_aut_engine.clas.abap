@@ -4,6 +4,9 @@
 "! 2. Ningún material de la OC con jerarquía de producto
 "! 3. Total de la OC convertido a la moneda del rango
 "! 4. Si el total está en el rango: tarea abierta y aprobación (wrapper Tier 2)
+"! Lecturas con WITH PRIVILEGED ACCESS: el job corre con ZJOBPROCESOS y no debe
+"! depender de sus autorizaciones de visualización de pedidos (M_BEST_*). El alcance
+"! lo limitan la tabla de rangos (grupos activos) y el Flexible Workflow.
 CLASS zcl_mm_po_aut_engine DEFINITION
   PUBLIC
   FINAL
@@ -169,6 +172,7 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
       INNER JOIN zmm_po_aut_rng AS rng
         ON  rng~purchasing_group = po~PurchasingGroup
         AND rng~is_active        = @abap_true
+      WITH PRIVILEGED ACCESS
       WHERE po~PurchasingProcessingStatus = @gc_procstat_in_approval
         AND po~PurchaseOrder              IN @it_purchase_orders
       INTO CORRESPONDING FIELDS OF TABLE @rt_po.
@@ -180,6 +184,7 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
     SELECT SINGLE @abap_true
       FROM i_purchaseorderitemapi01 AS item
       INNER JOIN i_product AS prod ON prod~Product = item~Material
+      WITH PRIVILEGED ACCESS
       WHERE item~PurchaseOrder                  = @iv_purchase_order
         AND item~PurchasingDocumentDeletionCode = @space
         AND prod~ProductHierarchy               <> @space
@@ -196,6 +201,7 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
     " (corrige el cálculo de ECC, que no consideraba la unidad de precio).
     SELECT OrderQuantity, NetPriceAmount, NetPriceQuantity
       FROM i_purchaseorderitemapi01
+      WITH PRIVILEGED ACCESS
       WHERE PurchaseOrder                  = @iv_purchase_order
         AND PurchasingDocumentDeletionCode = @space
       INTO TABLE @DATA(lt_items).

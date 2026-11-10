@@ -84,3 +84,4 @@ Datos actuales en ECC (`ZMM_COD_PED`) para migrar:
 | Agente excluido | Validado en la PoC: el reenvío falla y la OC queda con estado `FF` |
 | Falla de aprobación después del reenvío | Definido: antes de reenviar, el wrapper guarda el aprobador (agente que tomó la tarea o, si está READY, su destinatario usuario `OTYPE = US` con `SAP_WAPI_WORKITEM_RECIPIENTS`, firma confirmada). Si la aprobación falla, le reenvía la tarea de vuelta |
 | Prueba integral con F9 (OC 1100000509, grupo CRC, 175,15 USD) | Modo prueba: `TS`, WI 47041, nivel 1. Modo real: `AP`, nivel 1 aprobado |
+| Job con `ZJOBPROCESOS` en QS4 (OC 1100000839, 10-11-2026) | No aprobó: el WI quedó READY sin reenvío. `I_PurchaseOrderAPI01` (DCL) no devolvía la OC para `ZJOBPROCESOS` (sí para un usuario con `M_BEST_*`). Corregido con `WITH PRIVILEGED ACCESS` en las lecturas del motor |
