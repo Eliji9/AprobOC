@@ -166,7 +166,7 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
 
   METHOD get_pending_orders.
     " Solo OC de grupos de compras con rango activo.
-    " WITH PRIVILEGED ACCESS no se admite en un JOIN: se filtra por rango de grupos.
+    " Se filtra por rango de grupos (sin JOIN) para leer una sola vista con acceso privilegiado.
     DATA lr_group TYPE RANGE OF i_purchaseorderapi01-purchasinggroup.
 
     lr_group = VALUE #( FOR ls_rule IN it_rules
@@ -189,7 +189,7 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
 
 
   METHOD has_product_hierarchy.
-    " Dos lecturas (WITH PRIVILEGED ACCESS no se admite en un JOIN).
+    " Dos lecturas para que I_Product también se lea con acceso privilegiado.
     " Posiciones sin material (p. ej. texto) no cuentan como jerarquía.
     DATA lr_product TYPE RANGE OF i_product-product.
 
