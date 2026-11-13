@@ -9,7 +9,7 @@ INTERFACE zif_mm_po_aut_engine
       approved       TYPE c LENGTH 2 VALUE 'AP',  " Aprobada
       test_ok        TYPE c LENGTH 2 VALUE 'TS',  " Cumple la regla (modo prueba, no se aprueba)
       out_of_range   TYPE c LENGTH 2 VALUE 'OR',  " Monto fuera del rango: queda manual
-      has_hierarchy  TYPE c LENGTH 2 VALUE 'PH',  " Algún material con jerarquía de producto: queda manual
+      missing_hierarchy TYPE c LENGTH 2 VALUE 'SJ',  " Alguna posición sin jerarquía de producto: queda manual
       no_rule        TYPE c LENGTH 2 VALUE 'NR',  " Sin rango para el grupo de compras
       no_task        TYPE c LENGTH 2 VALUE 'NT',  " Sin tarea de aprobación abierta
       forward_failed TYPE c LENGTH 2 VALUE 'FF',  " No se pudo reenviar (p. ej. agente excluido)

@@ -1,7 +1,7 @@
 "! <p class="shorttext synchronized">Aprob. automática OC: motor</p>
 "! Motor de aprobación automática de OC (ABAP Cloud, Tier 1).
 "! 1. OC "En proc. autorización" de grupos de compras con rango activo
-"! 2. Ningún material de la OC con jerarquía de producto
+"! 2. Todos los materiales de la OC con jerarquía de producto
 "! 3. Total de la OC convertido a la moneda del rango
 "! 4. Si el total está en el rango: tarea abierta y aprobación (wrapper Tier 2)
 "! Lecturas con WITH PRIVILEGED ACCESS: el job corre con ZJOBPROCESOS y no debe
@@ -42,9 +42,10 @@ CLASS zcl_mm_po_aut_engine DEFINITION
                 it_purchase_orders TYPE zif_mm_po_aut_engine=>tt_po_range
       RETURNING VALUE(rt_po)       TYPE tt_po.
 
-    "! abap_true si alguna posición no borrada tiene un material con jerarquía
-    "! de producto (MARA-PRDHA). Una sola basta para no aprobar la OC.
-    METHODS has_product_hierarchy
+    "! abap_true solo si TODAS las posiciones no borradas tienen un material con
+    "! jerarquía de producto (MARA-PRDHA). Una posición sin jerarquía, o sin
+    "! material (p. ej. texto), basta para no aprobar la OC.
+    METHODS all_items_have_hierarchy
       IMPORTING iv_purchase_order TYPE i_purchaseorderapi01-purchaseorder
       RETURNING VALUE(rv_result)  TYPE abap_bool.
 
@@ -91,10 +92,10 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
         CONTINUE.
       ENDIF.
 
-      " Si algún material tiene jerarquía de producto, la OC queda manual
-      IF has_product_hierarchy( ls_po-purchase_order ) = abap_true.
-        <ls_res>-status  = zif_mm_po_aut_engine=>gc_status-has_hierarchy.
-        <ls_res>-message = `Material con jerarquía de producto`.
+      " Solo se aprueba si todos los materiales tienen jerarquía de producto
+      IF all_items_have_hierarchy( ls_po-purchase_order ) = abap_false.
+        <ls_res>-status  = zif_mm_po_aut_engine=>gc_status-missing_hierarchy.
+        <ls_res>-message = `Posición sin jerarquía de producto`.
         CONTINUE.
       ENDIF.
 
@@ -188,32 +189,37 @@ CLASS zcl_mm_po_aut_engine IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD has_product_hierarchy.
+  METHOD all_items_have_hierarchy.
     " Dos lecturas para que I_Product también se lea con acceso privilegiado.
-    " Posiciones sin material (p. ej. texto) no cuentan como jerarquía.
     DATA lr_product TYPE RANGE OF i_product-product.
 
-    SELECT DISTINCT Material
+    SELECT Material
       FROM i_purchaseorderitemapi01
       WITH PRIVILEGED ACCESS
       WHERE PurchaseOrder                  = @iv_purchase_order
         AND PurchasingDocumentDeletionCode = @space
-        AND Material                       <> @space
-      INTO TABLE @DATA(lt_material).
+      INTO TABLE @DATA(lt_item).
 
-    IF lt_material IS INITIAL.
+    " Sin posiciones, o alguna posición sin material: no se aprueba
+    IF lt_item IS INITIAL OR line_exists( lt_item[ Material = space ] ).
       RETURN.
     ENDIF.
 
-    lr_product = VALUE #( FOR ls_mat IN lt_material
-                          ( sign = 'I' option = 'EQ' low = ls_mat-Material ) ).
+    lr_product = VALUE #( FOR ls_item IN lt_item
+                          ( sign = 'I' option = 'EQ' low = ls_item-Material ) ).
+    SORT lr_product BY low.
+    DELETE ADJACENT DUPLICATES FROM lr_product COMPARING low.
 
-    SELECT SINGLE @abap_true
+    " Materiales de la OC que sí tienen jerarquía
+    SELECT Product
       FROM i_product
       WITH PRIVILEGED ACCESS
       WHERE Product          IN @lr_product
         AND ProductHierarchy <> @space
-      INTO @rv_result.
+      INTO TABLE @DATA(lt_with_hierarchy).
+
+    " Todos los materiales distintos deben tener jerarquía
+    rv_result = xsdbool( lines( lt_with_hierarchy ) = lines( lr_product ) ).
   ENDMETHOD.
 
 

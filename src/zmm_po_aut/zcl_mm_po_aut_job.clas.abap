@@ -105,7 +105,7 @@ CLASS zcl_mm_po_aut_job IMPLEMENTATION.
           DATA(lv_severity) = SWITCH #( ls_res-status
             WHEN zif_mm_po_aut_engine=>gc_status-approved      THEN if_bali_constants=>c_severity_status
             WHEN zif_mm_po_aut_engine=>gc_status-out_of_range
-              OR zif_mm_po_aut_engine=>gc_status-has_hierarchy
+              OR zif_mm_po_aut_engine=>gc_status-missing_hierarchy
               OR zif_mm_po_aut_engine=>gc_status-no_rule       THEN if_bali_constants=>c_severity_warning
             ELSE if_bali_constants=>c_severity_error ).
 
@@ -156,7 +156,7 @@ CLASS zcl_mm_po_aut_job IMPLEMENTATION.
     ENDIF.
 
     " Estados: AP aprobada · TS cumple (modo prueba) · OR fuera de rango · NR sin rango
-    "          PH material con jerarquía · NT sin tarea · FF no se pudo reenviar · ER error
+    "          SJ posición sin jerarquía · NT sin tarea · FF no se pudo reenviar · ER error
     out->write( lt_result ).
 
   ENDMETHOD.

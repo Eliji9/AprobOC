@@ -61,9 +61,9 @@ hasta confirmar si se usará.
 - Si el total de la OC (convertido a la moneda del rango, tasa del día) está dentro del rango,
   el motor aprueba la tarea abierta. Aplica igual a todos los niveles: en OC multinivel, cada
   ejecución aprueba un nivel y la siguiente toma el siguiente.
-- **Jerarquía de producto:** si alguna posición (no borrada) tiene un material con jerarquía de
-  producto (`I_Product-ProductHierarchy`, MARA-PRDHA), la OC no se aprueba aunque el monto esté en
-  el rango (estado `PH`). Basta una posición; las posiciones sin material no cuentan.
+- **Jerarquía de producto:** la OC solo se aprueba si **todas** las posiciones (no borradas) tienen un
+  material con jerarquía de producto (`I_Product-ProductHierarchy`, MARA-PRDHA). Si una sola posición
+  no tiene jerarquía, o no tiene material (p. ej. posición de texto), queda manual (estado `SJ`).
 - Si no cumple, la OC queda para aprobación manual.
 
 Datos actuales en ECC (`ZMM_COD_PED`) para migrar:
